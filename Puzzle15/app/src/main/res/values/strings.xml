@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Puzzle15</string>
+    <string name="action_settings">Settings</string>
+    <string name="timerTextView"><b>Timer: </b> 00:00</string>
+    <string name="movesTextView"><b>Moves: </b> 0</string>
+    <string name="bestMovesTextView"><b>Best moves: </b> 0</string>
+    <string name="randomize">Randomize</string>
+    <string name="solution">Show solution</string>
+    <string name="solved"><b>Solved!</b></string>
+    <string name="errorClickedOffAxes">Clicked off empty tile axes</string>
+    <string name="errorClickedEmptyTile">Clicked on the empty tile</string>
+    <string name="errorNotStarted">Game not started. Press randomize to start</string>
+    <string name="errorSolutionToggled">Solution is currently toggled. Press toggle solution to continue</string>
+    <string name="errorAlreadySolved">Game is already finished. Press randomize to start again</string>
+    <string name="confirmPopupNo">No</string>
+    <string name="confirmPopupYes">Yes</string>
+    <string name="confirmPopupQuestion">Are you sure you want to restart the game</string>
+</resources>

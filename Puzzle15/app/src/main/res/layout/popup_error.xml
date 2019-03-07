@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- https://stackoverflow.com/questions/5944987/how-to-create-a-popup-window-popupwindow-in-android -->
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape">
+
+    <TextView
+        android:id="@+id/textViewPopUpTextField"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        android:text="This is a popup window."
+        android:textAlignment="center"
+        android:textColor="@color/popUpForeground"
+        android:textSize="18sp" />
+
+</RelativeLayout>

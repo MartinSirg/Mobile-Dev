@@ -1,0 +1,22 @@
+[
+  {
+    "name": "SkyPlus",
+    "streamUrl": "http://sky.babahhcdn.com/SKYPLUS",
+    "songNameApiUrl" : "http://dad.akaver.com/api/SongTitles/SP"
+  },
+  {
+    "name": "RetroFM",
+    "streamUrl": "http://sky.babahhcdn.com/RETRO",
+    "songNameApiUrl" : "http://dad.akaver.com/api/SongTitles/RETRO"
+  },
+  {
+    "name": "NRJ",
+    "streamUrl": "http://sky.babahhcdn.com/NRJ",
+    "songNameApiUrl" : "http://dad.akaver.com/api/SongTitles/NRJ"
+  },
+  {
+    "name": "RockFM",
+    "streamUrl": "http://sky.babahhcdn.com/rck",
+    "songNameApiUrl" : "http://dad.akaver.com/api/SongTitles/ROCKFM"
+  }
+]

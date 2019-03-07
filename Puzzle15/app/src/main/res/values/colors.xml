@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#00BCD4</color>
+    <color name="colorPrimaryDark">#2196F3</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="colorEmptyTile">#4E494E</color>
+    <color name="filledTile" >#E91E63</color>
+    <color name="colorSuccess" >#28972E</color>
+    <color name="popUpBackground" >#F21A1717</color>
+    <color name="popUpButtonBackground" >#5A5A5A</color>
+    <color name="popUpForeground">#FFFFFFFF</color>
+</resources>
