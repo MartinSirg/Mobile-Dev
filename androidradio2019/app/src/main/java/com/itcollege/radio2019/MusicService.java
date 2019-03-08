@@ -10,6 +10,7 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.format.Time;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -27,6 +28,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -227,11 +230,16 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         songsRepo.open();
 
         int artistId = artistRepo.getArtistIdOrInsert(new Artist(artistName, mCurrentStation.getStationId()));
-        SongPlayed song = new SongPlayed(trackTitle,artistId,timePlayed);
+        SongPlayed song = new SongPlayed(trackTitle, artistId, timePlayed);
         songsRepo.add(song);
 
         Log.d(TAG, "REMOVE ME LATER! Songs database currently holds : " + songsRepo.getAll().size() + " songs.");
         Log.d(TAG, "REMOVE ME LATER! Artists database currently holds : " + artistRepo.getAll().size() + " artists");
+//        for (SongPlayed songPlayed : songsRepo.getAll()) {
+//            Date date = new Date((long) songPlayed.getTimePlayedAt() * 1000);
+//            Log.d(TAG, "Song played at: " +  new SimpleDateFormat("HH:mm:ss YYYY-MM-dd").format(date));
+//            // 1552039861
+//        }
 
         artistRepo.close();
         songsRepo.close();
@@ -242,7 +250,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive: STOP SERVICE");
-            switch (intent.getAction()){
+            switch (intent.getAction()) {
                 case C.ACTIVITY_INTENT_STOPPMUSIC:
                     stopSelf();
             }

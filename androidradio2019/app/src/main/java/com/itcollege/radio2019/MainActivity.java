@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         //
         StationRepository artistRepository = new StationRepository(this);
         artistRepository.open();
-        mStations =  artistRepository.getAllOrInitialize();
+        mStations = artistRepository.getAllOrInitialize();
         Log.d(TAG, "Stations: " + mStations.size());
         artistRepository.close();
 
@@ -102,10 +102,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         super.onResume();
 
 
-        mSettingsContentObserver = new SettingsContentObserver( new Handler() );
+        mSettingsContentObserver = new SettingsContentObserver(new Handler());
         this.getApplicationContext().getContentResolver().registerContentObserver(
                 android.provider.Settings.System.CONTENT_URI, true,
-                mSettingsContentObserver );
+                mSettingsContentObserver);
 
     }
 
@@ -149,10 +149,19 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     // ============================== OTHER ===============================
 
+    public void buttonStatisticsOnClick(View view){
+        Log.d(TAG, "buttonStatisticsOnClick: ");
+        Intent intent = new Intent(this, StatisticsActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(C.SERIALIZABLE_STATIONS, (Serializable) mStations);
+        intent.putExtra(C.SERIALIZABLE_STATIONS_BUNDLE, bundle);
+        this.startActivity(intent);
+    }
+
     public void buttonControlMusicOnClick(View view) {
         Log.d(TAG, "buttonControlMusicOnClick");
 
-        if (!mMusicServiceStarted){
+        if (!mMusicServiceStarted) {
             Intent intentStartService = new Intent(this, MusicService.class);
             intentStartService.putExtra(C.SERVICE_STATION_ID_KEY, mSelectedStation.getStationId());
             intentStartService.putExtra(C.SERVICE_STATION_NAME_KEY, mSelectedStation.getName());
@@ -168,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         }
     }
 
-    public void buttonSelectStationOnClick(View view){
+    public void buttonSelectStationOnClick(View view) {
         StationsDialog dialog = new StationsDialog();
 
         Bundle bundle = new Bundle();
@@ -178,8 +187,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         dialog.show(getSupportFragmentManager(), "DIALOG TAG");
     }
 
-    public void UpdateUI(){
-        switch (mMusicPlayerStatus){
+    public void UpdateUI() {
+        switch (mMusicPlayerStatus) {
             case C.MUSICSERVICE_STOPPED:
                 mButtonControlMusic.setText(C.BUTTONCONTROLMUSIC_LABEL_STOPPED);
                 break;
@@ -215,7 +224,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         //Doesn't restart service if station is same
         if (mSelectedStation == mStations.get(stationIndex)) return;
         mSelectedStation = mStations.get(stationIndex);
-        if (mMusicServiceStarted) buttonControlMusicOnClick(null); // Stops music service if its running
+        if (mMusicServiceStarted)
+            buttonControlMusicOnClick(null); // Stops music service if its running
         buttonControlMusicOnClick(null); // Starts music service
     }
 
@@ -225,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive " + intent.getAction());
-            switch (intent.getAction()){
+            switch (intent.getAction()) {
                 case C.MUSICSERVICE_INTENT_BUFFERING:
                     mMusicPlayerStatus = C.MUSICSERVICE_BUFFERING;
                     break;
@@ -244,7 +254,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             UpdateUI();
         }
     }
-
 
 
     public class SettingsContentObserver extends ContentObserver {
@@ -270,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
             Log.d(TAG, "Volume: " + Integer.toString(currentVolume));
 
-            if (currentVolume != previousVolume){
+            if (currentVolume != previousVolume) {
                 previousVolume = currentVolume;
                 mSeekBarAudioVolume.setProgress(currentVolume);
             }
@@ -281,4 +290,4 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     }
 
 
-    }
+}

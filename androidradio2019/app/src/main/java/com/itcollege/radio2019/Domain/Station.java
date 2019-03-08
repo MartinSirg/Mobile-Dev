@@ -24,7 +24,7 @@ public class Station implements Serializable
 
     @Override
     public String toString() {
-        return String.format("StationId: %d\nName: %s\nStreamUrl: %s\nSongsUrl: %s", stationId, name, streamUrl, songNameApiUrl);
+        return name;
     }
 
     //-----------------------Getters and setters-----------------------

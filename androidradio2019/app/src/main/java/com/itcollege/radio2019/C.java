@@ -5,7 +5,9 @@ public final class C {
     public static final String SERVICE_STATION_NAME_KEY = "serviceStationName";
     public static final String SERVICE_STATION_STREAM_URL_KEY = "serviceStationStreamUrl";
     public static final String SERVICE_STATION_SONGS_API_URL_KEY = "serviceStationSongsApiUrl";
+
     public static final String SERIALIZABLE_STATIONS = "stations";
+    public static final String SERIALIZABLE_STATIONS_BUNDLE = "stationsBundle";
 
     static private final String prefix = "com.itcollege.radio2019.";
     static public final String SERVICE_MEDIASOURCE_KEY = prefix + "SERVICE_MEDIASOURCE_KEY";

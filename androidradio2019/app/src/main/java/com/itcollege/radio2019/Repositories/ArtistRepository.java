@@ -22,17 +22,39 @@ public class ArtistRepository {
         this.context = context;
     }
 
+    public List<Artist> getAllArtistsOfStation(int stationId) {
+        List<Artist> artists = new ArrayList<>();
+        String[] columns = new String[]{
+                DatabaseHelper.ARTIST_ID,
+                DatabaseHelper.ARTIST_NAME,
+                DatabaseHelper.ARTIST_STATION_ID
+        };
+        String whereString = DatabaseHelper.ARTIST_STATION_ID + " = " + stationId;
+        Cursor cursor = db.query(DatabaseHelper.ARTIST_TABLE_NAME, columns, whereString,
+                null, null, null, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Artist artist = new Artist(
+                        cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ARTIST_ID)),
+                        cursor.getString(cursor.getColumnIndex(DatabaseHelper.ARTIST_NAME)),
+                        cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ARTIST_STATION_ID)));
+                artists.add(artist);
+            } while (cursor.moveToNext());
+        }
+        return artists;
+    }
+
     public ArtistRepository open() {
         dbHelper = new DatabaseHelper(context);
         db = dbHelper.getWritableDatabase();
         return this;
     }
 
-
     /**
      * @param artist artist object, id can be 0
      */
-    public int getArtistIdOrInsert(Artist artist){
+    public int getArtistIdOrInsert(Artist artist) {
         Log.d(TAG, "getArtistIdOrInsert");
 
         String[] columns = new String[]{
@@ -51,7 +73,7 @@ public class ArtistRepository {
         Cursor cursor = db.query(DatabaseHelper.ARTIST_TABLE_NAME, columns, whereString,
                 null, null, null, null);
 
-        if (cursor.moveToFirst()){
+        if (cursor.moveToFirst()) {
             int id = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ARTIST_ID));
             cursor.close();
             return id;
@@ -89,7 +111,6 @@ public class ArtistRepository {
         }
         return artists;
     }
-
 
     private Cursor fetch() {
         String[] columns = new String[]{
