@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         intentFilter.addAction(C.MUSICSERVICE_INTENT_STOPPED);
         intentFilter.addAction(C.MUSICSERVICE_INTENT_SONGINFO);
 
+        //Broadcast receiver
 
         mBroadcastReceiver = new MainActivityBroadcastReceiver();
 
@@ -161,7 +162,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             this.startService(intentStartService);
             mMusicServiceStarted = true;
         } else {
-            stopService(new Intent(this, MusicService.class));
+            Intent intentInformService = new Intent(C.ACTIVITY_INTENT_STOPPMUSIC);
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intentInformService);
             mMusicServiceStarted = false;
         }
     }

@@ -2,7 +2,9 @@ package com.itcollege.radio2019;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -63,6 +65,12 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
             return Service.START_NOT_STICKY;
         }
 
+        mBroadcastReceiver = new MusicServiceBroadcastReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(C.ACTIVITY_INTENT_STOPPMUSIC);
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver, intentFilter);
+
+
         mMediaPlayer.reset();
 
         mCurrentStation = new Station(
@@ -99,6 +107,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     @Override
     public void onDestroy() {
         mMediaPlayer.stop();
+        mMediaPlayer.release();
         if (mScheduledExecutorService != null) mScheduledExecutorService.shutdown();
         WebApiSingletonServiceHandler.getInstance(getApplicationContext()).cancelRequestQueue(C.MUSICSERVICE_VOLLEYTAG);
         Intent intentInformActivity = new Intent(C.MUSICSERVICE_INTENT_STOPPED);
@@ -226,5 +235,17 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
         artistRepo.close();
         songsRepo.close();
+    }
+
+    public class MusicServiceBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive: STOP SERVICE");
+            switch (intent.getAction()){
+                case C.ACTIVITY_INTENT_STOPPMUSIC:
+                    stopSelf();
+            }
+        }
     }
 }
