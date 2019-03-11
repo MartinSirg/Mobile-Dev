@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private Button mButtonControlMusic;
     private TextView mTextViewArtist;
     private TextView mTextViewTitle;
+    private TextView mTextViewStation;
     private SeekBar mSeekBarAudioVolume;
 
     private SettingsContentObserver mSettingsContentObserver;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private String mTrackTitle;
 
     private List<Station> mStations;
+    private FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         mTextViewArtist = (TextView) findViewById(R.id.textViewArtist);
         mTextViewTitle = (TextView) findViewById(R.id.textViewTitle);
         mSeekBarAudioVolume = (SeekBar) findViewById(R.id.seekBarAudioVolume);
+        mTextViewStation = (TextView) findViewById(R.id.textViewRadioStation);
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+
 
         // set the seek bar maximum - based on audiomanager reported max
         AudioManager audio = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
@@ -85,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         artistRepository.close();
 
         mSelectedStation = mStations.get(0);
+        mTextViewStation.setText(mSelectedStation.getName());
 
     }
 
@@ -171,8 +178,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             this.startService(intentStartService);
             mMusicServiceStarted = true;
         } else {
-            Intent intentInformService = new Intent(C.ACTIVITY_INTENT_STOPPMUSIC);
-            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intentInformService);
+            Intent intentStopService = new Intent(this, MusicService.class);
+            this.stopService(intentStopService);
+            mTextViewArtist.setText("");
+            mTextViewTitle.setText("");
             mMusicServiceStarted = false;
         }
     }
@@ -194,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 break;
             case C.MUSICSERVICE_BUFFERING:
                 mButtonControlMusic.setText(C.BUTTONCONTROLMUSIC_LABEL_BUFFERING);
+
                 break;
             case C.MUSICSERVICE_PLAYING:
                 mButtonControlMusic.setText(C.BUTTONCONTROLMUSIC_LABEL_PLAYING);
@@ -227,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         if (mMusicServiceStarted)
             buttonControlMusicOnClick(null); // Stops music service if its running
         buttonControlMusicOnClick(null); // Starts music service
+        mTextViewStation.setText(mSelectedStation.getName());
     }
 
 
