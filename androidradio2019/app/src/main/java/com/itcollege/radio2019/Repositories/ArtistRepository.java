@@ -10,8 +10,8 @@ import com.itcollege.radio2019.DatabaseHelper;
 import com.itcollege.radio2019.Domain.Artist;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class ArtistRepository {
     private static final String TAG = ArtistRepository.class.getSimpleName();
@@ -58,7 +58,7 @@ public class ArtistRepository {
             if (artist.getTimesPlayed() > 0) resultArtists.add(artist);
         }
         songPlayedRepository.close();
-        resultArtists.sort((artist1, artist2) -> Integer.compare(artist2.getTimesPlayed(), artist1.getTimesPlayed()));
+        Collections.sort(resultArtists,(artist1, artist2) -> Integer.compare(artist2.getTimesPlayed(), artist1.getTimesPlayed()) );
         return resultArtists;
     }
 

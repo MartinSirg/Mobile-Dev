@@ -13,7 +13,6 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.format.Time;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -31,10 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -76,6 +72,8 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
             Log.e(TAG, "Intent was null!!!");
             return Service.START_NOT_STICKY;
         }
+
+        //------------------------------------Notification setup------------------------------------
 
         Intent startActivity = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,

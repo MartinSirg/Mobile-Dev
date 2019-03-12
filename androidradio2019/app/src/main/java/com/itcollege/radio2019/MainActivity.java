@@ -14,7 +14,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -164,8 +163,12 @@ public class MainActivity extends AppCompatActivity implements
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         Log.d(TAG, "onRestoreInstanceState");
 
-        mSelectedStation = mStations.stream()
-                .filter(station -> station.getStationId() == savedInstanceState.getInt(C.SAVE_STATE_SELECTED_STATION)).findFirst().get();
+        for (Station station : mStations) {
+            if (station.getStationId() == savedInstanceState.getInt(C.SAVE_STATE_SELECTED_STATION)) {
+                mSelectedStation = station;
+            }
+        }
+
         mArtist = savedInstanceState.getString(C.SAVE_STATE_CURRENT_ARTIST);
         mTrackTitle = savedInstanceState.getString(C.SAVE_STATE_CURRENT_SONG);
         mMusicPlayerStatus = savedInstanceState.getInt(C.SAVE_STATE_MEDIA_PLAYER_STATUS);
@@ -289,7 +292,11 @@ public class MainActivity extends AppCompatActivity implements
                 case C.MUSICSERVICE_INTENT_SONGINFO:
                     mMusicServiceStarted = true;
                     mMusicPlayerStatus = C.MUSICSERVICE_PLAYING;
-                    mSelectedStation = mStations.stream().filter(station -> station.getStationId() == intent.getIntExtra(C.MUSICSERVICE_STATION, 1)).findFirst().get();
+                    for (Station station : mStations) {
+                        if (station.getStationId() == intent.getIntExtra(C.SAVE_STATE_SELECTED_STATION, 1)) {
+                            mSelectedStation = station;
+                        }
+                    }
                     mArtist = intent.getStringExtra(C.MUSICSERVICE_ARTIST);
                     mTrackTitle = intent.getStringExtra(C.MUSICSERVICE_TRACKTITLE);
                     break;

@@ -2,7 +2,6 @@ package com.itcollege.radio2019;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +17,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.itcollege.radio2019.Domain.Artist;
-import com.itcollege.radio2019.Domain.SongPlayed;
 import com.itcollege.radio2019.Domain.Station;
 import com.itcollege.radio2019.Fragments.DatePickerFragment;
 import com.itcollege.radio2019.Fragments.TimePickerFragment;
@@ -26,7 +24,7 @@ import com.itcollege.radio2019.Repositories.ArtistRepository;
 import com.itcollege.radio2019.Repositories.SongPlayedRepostory;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class StatisticsActivity extends AppCompatActivity implements
@@ -113,7 +111,11 @@ public class StatisticsActivity extends AppCompatActivity implements
         recyclerView.setAdapter(mRecyclerViewAdapter);
 
         mTextViewArtistsCount.setText("Unique artists - " + artistsWithUniqueSongs.size());
-        mTextVieUniqueSongsCount.setText("Unique songs - " + artistsWithUniqueSongs.stream().mapToInt(artist -> artist.getUniqueSongs().size()).sum());
+
+        int uniqueSongsCount = 0;
+        for (Artist artist : artistsWithUniqueSongs) uniqueSongsCount += artist.getUniqueSongs().size();
+
+        mTextVieUniqueSongsCount.setText("Unique songs - " + uniqueSongsCount);
     }
 
     public void buttonSetStartOnClick(View view) {

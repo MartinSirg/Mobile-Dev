@@ -15,8 +15,7 @@ import android.widget.TextView;
 import com.itcollege.radio2019.Domain.Artist;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +49,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         SpannableStringBuilder sb = new SpannableStringBuilder();
         if (timesPlayed > 0) {
             List<Map.Entry<String, Integer>> entryList = new ArrayList<>(artists.get(i).uniqueSongs.entrySet());
-            entryList.sort((e1, e2) -> Integer.compare(e1.getValue(), e2.getValue()));
+            Collections.sort(entryList, (e1, e2) -> Integer.compare(e1.getValue(), e2.getValue()));
 
             for (Map.Entry<String, Integer> entry : entryList) {
                 int start = 0, end = 0;

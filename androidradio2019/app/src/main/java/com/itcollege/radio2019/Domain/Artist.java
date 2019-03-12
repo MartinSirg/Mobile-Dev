@@ -1,6 +1,5 @@
 package com.itcollege.radio2019.Domain;
 
-import java.util.Dictionary;
 import java.util.Hashtable;
 
 public class Artist {
