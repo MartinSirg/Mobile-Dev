@@ -28,7 +28,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -82,9 +84,6 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                 intent.getExtras().getString(C.SERVICE_STATION_STREAM_URL_KEY),
                 intent.getExtras().getString(C.SERVICE_STATION_SONGS_API_URL_KEY)
         );
-
-        // TODO: Handle icoming phone calls. What about skype?
-
 
         try {
             mMediaPlayer.setDataSource(mCurrentStation.getStreamUrl());
@@ -235,6 +234,11 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
         Log.d(TAG, "REMOVE ME LATER! Songs database currently holds : " + songsRepo.getAll().size() + " songs.");
         Log.d(TAG, "REMOVE ME LATER! Artists database currently holds : " + artistRepo.getAll().size() + " artists");
+
+        Calendar c =  Calendar.getInstance();
+//        c.setTimeInMillis((long) song.getTimePlayedAt() * 1000);
+//        Log.d(TAG, "updateDatabase: Song played at " +  DateFormat.getDateTimeInstance().format(c.getTime()));
+
 //        for (SongPlayed songPlayed : songsRepo.getAll()) {
 //            Date date = new Date((long) songPlayed.getTimePlayedAt() * 1000);
 //            Log.d(TAG, "Song played at: " +  new SimpleDateFormat("HH:mm:ss YYYY-MM-dd").format(date));

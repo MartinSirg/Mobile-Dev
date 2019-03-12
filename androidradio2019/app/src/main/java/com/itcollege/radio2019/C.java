@@ -6,9 +6,22 @@ public final class C {
     public static final String SERVICE_STATION_STREAM_URL_KEY = "serviceStationStreamUrl";
     public static final String SERVICE_STATION_SONGS_API_URL_KEY = "serviceStationSongsApiUrl";
 
+    //==================================== Serializable bundle =====================================
+
     public static final String SERIALIZABLE_STATIONS = "stations";
     public static final String SERIALIZABLE_STATIONS_BUNDLE = "stationsBundle";
 
+    //=============================== Save instance state constants ================================
+
+    public static final String SAVE_STATE_MEDIA_PLAYER_STATUS = "SAVE_STATE_MEDIA_PLAYER_STATUS";
+    public static final String SAVE_STATE_SELECTED_STATION = "SAVE_STATE_SELECTED_STATION";
+    public static final String SAVE_STATE_CURRENT_ARTIST = "SAVE_STATE_CURRENT_ARTIST";
+    public static final String SAVE_STATE_CURRENT_SONG = "SAVE_STATE_CURRENT_SONG";
+
+    public static final String SAVE_STATE_END_DATE = "SAVE_STATE_END_DATE";
+    public static final String SAVE_STATE_START_DATE = "SAVE_STATE_START_DATE";
+
+    //==============================================================================================
     static private final String prefix = "com.itcollege.radio2019.";
     static public final String SERVICE_MEDIASOURCE_KEY = prefix + "SERVICE_MEDIASOURCE_KEY";
 

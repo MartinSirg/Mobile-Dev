@@ -1,9 +1,13 @@
 package com.itcollege.radio2019.Domain;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 public class Artist {
     private int artistId;
     private String artistName;
     private int stationId;
+    public Hashtable<String, Integer> uniqueSongs;
 
     public Artist(String artistName, int stationId) {
         this(0,artistName, stationId);
@@ -13,6 +17,14 @@ public class Artist {
         this.artistId = artistId;
         this.artistName = artistName;
         this.stationId = stationId;
+    }
+
+    public int getTimesPlayed() {
+        int counter = 0;
+        if (uniqueSongs != null) {
+            for (Integer value : uniqueSongs.values()) counter += value;
+        }
+        return counter;
     }
 
     //-----------------------Getters and setters-----------------------
@@ -38,5 +50,13 @@ public class Artist {
 
     public void setStationId(int stationId) {
         this.stationId = stationId;
+    }
+
+    public Hashtable<String, Integer> getUniqueSongs() {
+        return uniqueSongs;
+    }
+
+    public void setUniqueSongs(Hashtable<String, Integer> uniqueSongs) {
+        this.uniqueSongs = uniqueSongs;
     }
 }

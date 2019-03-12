@@ -1,4 +1,4 @@
-package com.itcollege.radio2019;
+package com.itcollege.radio2019.Fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 
+import com.itcollege.radio2019.C;
 import com.itcollege.radio2019.Domain.Station;
+import com.itcollege.radio2019.R;
 
 import java.util.List;
 

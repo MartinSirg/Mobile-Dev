@@ -11,6 +11,7 @@ import com.itcollege.radio2019.Domain.Artist;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ArtistRepository {
     private static final String TAG = ArtistRepository.class.getSimpleName();
@@ -22,7 +23,15 @@ public class ArtistRepository {
         this.context = context;
     }
 
-    public List<Artist> getAllArtistsOfStation(int stationId) {
+    /**
+     * Returns a list of all artists of a specific station, from statTime until endTime
+     * @param stationId station id where artist was played
+     * @param songPlayedRepository song repo instance
+     * @param startTime seconds after epoch
+     * @param endTime seconds after epoch
+     * @return
+     */
+    public List<Artist> getAllWithUniqueSongs(int stationId, SongPlayedRepostory songPlayedRepository, long startTime, long endTime) {
         List<Artist> artists = new ArrayList<>();
         String[] columns = new String[]{
                 DatabaseHelper.ARTIST_ID,
@@ -42,7 +51,15 @@ public class ArtistRepository {
                 artists.add(artist);
             } while (cursor.moveToNext());
         }
-        return artists;
+        songPlayedRepository.open();
+        List<Artist> resultArtists = new ArrayList<>();
+        for (Artist artist : artists) {
+            artist.setUniqueSongs(songPlayedRepository.getArtistsUniqueSongs(artist.getArtistId(), startTime, endTime));
+            if (artist.getTimesPlayed() > 0) resultArtists.add(artist);
+        }
+        songPlayedRepository.close();
+        resultArtists.sort((artist1, artist2) -> Integer.compare(artist2.getTimesPlayed(), artist1.getTimesPlayed()));
+        return resultArtists;
     }
 
     public ArtistRepository open() {

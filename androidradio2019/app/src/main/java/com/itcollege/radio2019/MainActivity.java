@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.os.Handler;
@@ -18,12 +19,15 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.itcollege.radio2019.Domain.Station;
+import com.itcollege.radio2019.Fragments.StationsDialog;
 import com.itcollege.radio2019.Repositories.StationRepository;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener, StationsDialog.StationDialogListener {
+public class MainActivity extends AppCompatActivity implements
+        SeekBar.OnSeekBarChangeListener,
+        StationsDialog.StationDialogListener {
     static private final String TAG = MainActivity.class.getSimpleName();
     private BroadcastReceiver mBroadcastReceiver;
 
@@ -31,10 +35,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private boolean mMusicServiceStarted = false;
     private Station mSelectedStation;
 
-    private Button mButtonControlMusic;
     private TextView mTextViewArtist;
     private TextView mTextViewTitle;
     private TextView mTextViewStation;
+    private TextView mTextViewVolume;
     private SeekBar mSeekBarAudioVolume;
 
     private SettingsContentObserver mSettingsContentObserver;
@@ -51,12 +55,11 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        mButtonControlMusic = (Button) findViewById(R.id.buttonControlMusic);
         mTextViewArtist = (TextView) findViewById(R.id.textViewArtist);
         mTextViewTitle = (TextView) findViewById(R.id.textViewTitle);
         mSeekBarAudioVolume = (SeekBar) findViewById(R.id.seekBarAudioVolume);
         mTextViewStation = (TextView) findViewById(R.id.textViewRadioStation);
+        mTextViewVolume = findViewById(R.id.textViewVolume);
         mFab = (FloatingActionButton) findViewById(R.id.fab);
 
 
@@ -65,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         mSeekBarAudioVolume.setMax(audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         // and the position
         mSeekBarAudioVolume.setProgress(audio.getStreamVolume(AudioManager.STREAM_MUSIC));
+        mTextViewVolume.setText(Integer.toString(mSeekBarAudioVolume.getProgress()));
 
 
         mSeekBarAudioVolume.setOnSeekBarChangeListener(this);
@@ -144,19 +148,31 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d(TAG, "onSaveInstanceState");
+        Log.d(TAG, "onSaveInstanceState: stationID = " + mSelectedStation.getStationId());
+        outState.putInt(C.SAVE_STATE_MEDIA_PLAYER_STATUS, mMusicPlayerStatus);
+        outState.putInt(C.SAVE_STATE_SELECTED_STATION, mSelectedStation.getStationId());
+        outState.putString(C.SAVE_STATE_CURRENT_ARTIST, mArtist);
+        outState.putString(C.SAVE_STATE_CURRENT_SONG, mTrackTitle);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         Log.d(TAG, "onRestoreInstanceState");
+
+        mSelectedStation = mStations.stream()
+                .filter(station -> station.getStationId() == savedInstanceState.getInt(C.SAVE_STATE_SELECTED_STATION)).findFirst().get();
+        mArtist = savedInstanceState.getString(C.SAVE_STATE_CURRENT_ARTIST);
+        mTrackTitle = savedInstanceState.getString(C.SAVE_STATE_CURRENT_SONG);
+        mMusicPlayerStatus = savedInstanceState.getInt(C.SAVE_STATE_MEDIA_PLAYER_STATUS);
+        mMusicServiceStarted = mMusicPlayerStatus != C.MUSICSERVICE_STOPPED;
+        updateUI();
         super.onRestoreInstanceState(savedInstanceState);
     }
 
     // ============================== OTHER ===============================
 
-    public void buttonStatisticsOnClick(View view){
+    public void buttonStatisticsOnClick(View view) {
         Log.d(TAG, "buttonStatisticsOnClick: ");
         Intent intent = new Intent(this, StatisticsActivity.class);
         Bundle bundle = new Bundle();
@@ -180,8 +196,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         } else {
             Intent intentStopService = new Intent(this, MusicService.class);
             this.stopService(intentStopService);
-            mTextViewArtist.setText("");
-            mTextViewTitle.setText("");
             mMusicServiceStarted = false;
         }
     }
@@ -196,21 +210,35 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         dialog.show(getSupportFragmentManager(), "DIALOG TAG");
     }
 
-    public void UpdateUI() {
+    public void buttonVolumeUpOnClick(View view) {
+        mSeekBarAudioVolume.setProgress(mSeekBarAudioVolume.getProgress() + 1);
+        mTextViewVolume.setText(Integer.toString(mSeekBarAudioVolume.getProgress()));    }
+
+    public void buttonVolumeDownOnClick(View view) {
+        mSeekBarAudioVolume.setProgress(mSeekBarAudioVolume.getProgress() - 1);
+        mTextViewVolume.setText(Integer.toString(mSeekBarAudioVolume.getProgress()));    }
+
+    public void updateUI() {
         switch (mMusicPlayerStatus) {
             case C.MUSICSERVICE_STOPPED:
-                mButtonControlMusic.setText(C.BUTTONCONTROLMUSIC_LABEL_STOPPED);
-                break;
-            case C.MUSICSERVICE_BUFFERING:
-                mButtonControlMusic.setText(C.BUTTONCONTROLMUSIC_LABEL_BUFFERING);
+                mFab.setImageResource(android.R.drawable.ic_media_play);
+                mFab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.color_green)));
+                mArtist = "";
+                mTrackTitle = "";
 
                 break;
+            case C.MUSICSERVICE_BUFFERING:
+                mFab.setImageResource(android.R.drawable.stat_notify_sync);
+                mFab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.color_orange)));
+                break;
             case C.MUSICSERVICE_PLAYING:
-                mButtonControlMusic.setText(C.BUTTONCONTROLMUSIC_LABEL_PLAYING);
+                mFab.setImageResource(android.R.drawable.ic_media_pause);
+                mFab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.color_red)));
                 break;
         }
         mTextViewArtist.setText(mArtist);
         mTextViewTitle.setText(mTrackTitle);
+        mTextViewStation.setText(mSelectedStation.getName());
     }
 
     @Override
@@ -221,12 +249,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-
     }
 
     @Override
@@ -239,7 +265,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         buttonControlMusicOnClick(null); // Starts music service
         mTextViewStation.setText(mSelectedStation.getName());
     }
-
 
     public class MainActivityBroadcastReceiver extends BroadcastReceiver {
 
@@ -262,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     break;
             }
 
-            UpdateUI();
+            updateUI();
         }
     }
 
@@ -293,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             if (currentVolume != previousVolume) {
                 previousVolume = currentVolume;
                 mSeekBarAudioVolume.setProgress(currentVolume);
-            }
+                mTextViewVolume.setText(Integer.toString(mSeekBarAudioVolume.getProgress()));            }
 
         }
 

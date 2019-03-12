@@ -1,5 +1,8 @@
 package com.itcollege.radio2019.Domain;
 
+import java.text.DateFormat;
+import java.util.Calendar;
+
 public class SongPlayed {
     private int songPlayedId;
     private String songTitle;
@@ -49,5 +52,12 @@ public class SongPlayed {
 
     public void setTimePlayedAt(int timePlayedAt) {
         this.timePlayedAt = timePlayedAt;
+    }
+
+    @Override
+    public String toString() {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis( (long) timePlayedAt * 1000);
+        return String.format("%s - %s by %d", DateFormat.getDateTimeInstance().format(c.getTime()), songTitle, artistId );
     }
 }

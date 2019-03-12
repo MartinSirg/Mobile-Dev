@@ -4,11 +4,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.itcollege.radio2019.DatabaseHelper;
 import com.itcollege.radio2019.Domain.SongPlayed;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 public class SongPlayedRepostory {
@@ -103,4 +106,29 @@ public class SongPlayedRepostory {
     }
 
 
+    public Hashtable<String, Integer> getArtistsUniqueSongs(int artistId, long startTime, long endTime) {
+        Hashtable<String, Integer> uniqueSongs = new Hashtable<>();
+        String[] columns = new String[]{
+                DatabaseHelper.SONG_PLAYED_ID,
+                DatabaseHelper.SONG_PLAYED_TITLE,
+                DatabaseHelper.SONG_PLAYED_ARTIST_ID,
+                DatabaseHelper.SONG_PLAYED_TIME_PLAYED
+        };
+
+        String whereString = DatabaseHelper.SONG_PLAYED_ARTIST_ID +  " = " + artistId + " AND " +
+                DatabaseHelper.SONG_PLAYED_TIME_PLAYED  + " > " + startTime + " AND " +
+                DatabaseHelper.SONG_PLAYED_TIME_PLAYED  + " < " + endTime;
+
+        Cursor cursor = db.query(DatabaseHelper.SONG_PLAYED_TABLE_NAME, columns, whereString,
+                null, null, null, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                String songName = cursor.getString(cursor.getColumnIndex(DatabaseHelper.SONG_PLAYED_TITLE));
+                if (uniqueSongs.containsKey(songName)) uniqueSongs.put(songName, uniqueSongs.get(songName) + 1);
+                else uniqueSongs.put(songName, 1);
+            } while (cursor.moveToNext());
+        }
+        return uniqueSongs;
+    }
 }
