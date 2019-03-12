@@ -97,6 +97,9 @@ public class MainActivity extends AppCompatActivity implements
         mSelectedStation = mStations.get(0);
         mTextViewStation.setText(mSelectedStation.getName());
 
+        Intent songInfoRequestIntent = new Intent(C.ACTIVITY_INTENT_SEND_DATA);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(songInfoRequestIntent);
+
     }
 
 
@@ -137,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         Log.d(TAG, "onDestroy");
         super.onDestroy();
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mBroadcastReceiver);
     }
 
 
@@ -219,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements
         mTextViewVolume.setText(Integer.toString(mSeekBarAudioVolume.getProgress()));    }
 
     public void updateUI() {
+        Log.d(TAG, "updateUI: ");
         switch (mMusicPlayerStatus) {
             case C.MUSICSERVICE_STOPPED:
                 mFab.setImageResource(android.R.drawable.ic_media_play);
@@ -282,6 +287,9 @@ public class MainActivity extends AppCompatActivity implements
                     mMusicPlayerStatus = C.MUSICSERVICE_STOPPED;
                     break;
                 case C.MUSICSERVICE_INTENT_SONGINFO:
+                    mMusicServiceStarted = true;
+                    mMusicPlayerStatus = C.MUSICSERVICE_PLAYING;
+                    mSelectedStation = mStations.stream().filter(station -> station.getStationId() == intent.getIntExtra(C.MUSICSERVICE_STATION, 1)).findFirst().get();
                     mArtist = intent.getStringExtra(C.MUSICSERVICE_ARTIST);
                     mTrackTitle = intent.getStringExtra(C.MUSICSERVICE_TRACKTITLE);
                     break;

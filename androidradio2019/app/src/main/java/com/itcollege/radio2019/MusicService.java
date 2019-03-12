@@ -1,5 +1,7 @@
 package com.itcollege.radio2019;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.Time;
 import android.util.Log;
@@ -36,6 +39,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.itcollege.radio2019.App.CHANNEL_ID;
+
 public class MusicService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnPreparedListener {
     static private final String TAG = MusicService.class.getSimpleName();
 
@@ -49,6 +54,8 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private Station mCurrentStation;
     private ScheduledExecutorService mScheduledExecutorService;
     private BroadcastReceiver mBroadcastReceiver;
+    private String mLastArtistName = "";
+    private String mLastTrackTitle = "";
 
     @Override
     public void onCreate() {
@@ -70,11 +77,21 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
             return Service.START_NOT_STICKY;
         }
 
+        Intent startActivity = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                0,startActivity,0);
+
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("Radio is running")
+                .setSmallIcon(R.drawable.ic_android)
+                .setContentIntent(pendingIntent)
+                .build();
+        startForeground(1, notification);
+
         mBroadcastReceiver = new MusicServiceBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(C.ACTIVITY_INTENT_STOPPMUSIC);
+        intentFilter.addAction(C.ACTIVITY_INTENT_SEND_DATA);
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver, intentFilter);
-
 
         mMediaPlayer.reset();
 
@@ -102,7 +119,8 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         }
 
 
-        return Service.START_REDELIVER_INTENT;
+//        return Service.START_REDELIVER_INTENT;
+        return START_NOT_STICKY;
     }
 
     //This is called when stopService() is called
@@ -114,6 +132,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         WebApiSingletonServiceHandler.getInstance(getApplicationContext()).cancelRequestQueue(C.MUSICSERVICE_VOLLEYTAG);
         Intent intentInformActivity = new Intent(C.MUSICSERVICE_INTENT_STOPPED);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intentInformActivity);
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mBroadcastReceiver);
     }
 
     // ====================== Typically not used =====================
@@ -168,6 +187,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
         @Override
         protected Void doInBackground(Void... voids) {
+            Log.d(TAG, "doInBackground started: ");
             String songInfoUrl = mCurrentStation.getSongNameApiUrl();
             StringRequest stringRequest = new StringRequest(
                     Request.Method.GET,
@@ -185,16 +205,17 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                                 JSONArray jsonArraySongHistory = jsonObjectStationInfo.getJSONArray("SongHistoryList");
                                 JSONObject jsonSongInfo = jsonArraySongHistory.getJSONObject(0);
 
-                                String artistName = jsonSongInfo.getString("Artist");
-                                String trackTitle = jsonSongInfo.getString("Title");
+                                mLastArtistName = jsonSongInfo.getString("Artist");
+                                mLastTrackTitle = jsonSongInfo.getString("Title");
                                 int timePlayed = jsonSongInfo.getInt("TimeStamp");
 
-                                updateDatabase(artistName, trackTitle, timePlayed);
+                                updateDatabase(mLastArtistName, mLastTrackTitle, timePlayed);
 
                                 // broadcast the song info
                                 Intent sendSongInfoIntent = new Intent(C.MUSICSERVICE_INTENT_SONGINFO);
-                                sendSongInfoIntent.putExtra(C.MUSICSERVICE_ARTIST, artistName);
-                                sendSongInfoIntent.putExtra(C.MUSICSERVICE_TRACKTITLE, trackTitle);
+                                sendSongInfoIntent.putExtra(C.MUSICSERVICE_ARTIST, mLastArtistName);
+                                sendSongInfoIntent.putExtra(C.MUSICSERVICE_TRACKTITLE, mLastTrackTitle);
+                                sendSongInfoIntent.putExtra(C.MUSICSERVICE_STATION, mCurrentStation.getStationId());
                                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(sendSongInfoIntent);
 
 
@@ -255,8 +276,14 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "onReceive: STOP SERVICE");
             switch (intent.getAction()) {
-                case C.ACTIVITY_INTENT_STOPPMUSIC:
-                    stopSelf();
+                case C.ACTIVITY_INTENT_SEND_DATA:
+                    if (mLastArtistName.equals("") && mLastTrackTitle.equals("")) break;
+                    // broadcast the song info
+                    Intent sendSongInfoIntent = new Intent(C.MUSICSERVICE_INTENT_SONGINFO);
+                    sendSongInfoIntent.putExtra(C.MUSICSERVICE_ARTIST, mLastArtistName);
+                    sendSongInfoIntent.putExtra(C.MUSICSERVICE_TRACKTITLE, mLastTrackTitle);
+                    sendSongInfoIntent.putExtra(C.MUSICSERVICE_STATION, mCurrentStation.getStationId());
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(sendSongInfoIntent);
             }
         }
     }

@@ -39,10 +39,12 @@ public final class C {
 
     static public final String MUSICSERVICE_ARTIST = prefix + "MUSICSERVICE_ARTIST";
     static public final String MUSICSERVICE_TRACKTITLE = prefix + "MUSICSERVICE_TRACKTITLE";
+    public static final String MUSICSERVICE_STATION = "MUSICSERVICE_STATION";
 
     // Activity to Mediaplayer broadcast intent messages
     static public final String ACTIVITY_INTENT_STARTMUSIC = prefix + "ACTIVITY_INTENT_STARTMUSIC";
     static public final String ACTIVITY_INTENT_STOPPMUSIC = prefix + "ACTIVITY_INTENT_STOPPMUSIC";
+    public static final String ACTIVITY_INTENT_SEND_DATA = "ACTIVITY_INTENT_SEND_DATA";
 
     // Main activity PLAY button labels
     static public final String BUTTONCONTROLMUSIC_LABEL_PLAYING = "STOP";
