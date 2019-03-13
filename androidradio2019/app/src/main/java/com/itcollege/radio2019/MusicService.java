@@ -7,11 +7,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -52,6 +54,8 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private BroadcastReceiver mBroadcastReceiver;
     private String mLastArtistName = "";
     private String mLastTrackTitle = "";
+    private NotificationManagerCompat mNotificationManager;
+    private PendingIntent mPendingIntent;
 
     @Override
     public void onCreate() {
@@ -76,15 +80,19 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         //------------------------------------Notification setup------------------------------------
 
         Intent startActivity = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+        mPendingIntent = PendingIntent.getActivity(this,
                 0,startActivity,0);
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Radio is running")
-                .setSmallIcon(R.drawable.ic_android)
-                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.ic_radio)
+                .setContentIntent(mPendingIntent)
                 .build();
         startForeground(1, notification);
+
+        mNotificationManager = NotificationManagerCompat.from(this);
+        // https://codinginflow.com/tutorials/android/notifications-notification-channels/part-1-notification-channels
+
 
         mBroadcastReceiver = new MusicServiceBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter();
@@ -215,6 +223,18 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                                 sendSongInfoIntent.putExtra(C.MUSICSERVICE_TRACKTITLE, mLastTrackTitle);
                                 sendSongInfoIntent.putExtra(C.MUSICSERVICE_STATION, mCurrentStation.getStationId());
                                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(sendSongInfoIntent);
+
+                                Notification notification = new NotificationCompat.Builder(getApplication(), App.CHANNEL_ID)
+                                        .setSmallIcon(R.drawable.ic_radio)
+                                        .setLargeIcon(BitmapFactory.decodeResource(getApplication().getResources(), R.mipmap.ic_launcher))
+                                        .setContentTitle(mCurrentStation.getName() + " - " + mLastArtistName)
+                                        .setContentText(mLastTrackTitle)
+                                        .setContentIntent(mPendingIntent)
+                                        .setColor(getResources().getColor(R.color.colorPrimaryDark))
+                                        .setPriority(NotificationCompat.PRIORITY_LOW)
+                                        .build();
+
+                                mNotificationManager.notify(1, notification);
 
 
                             } catch (JSONException e) {

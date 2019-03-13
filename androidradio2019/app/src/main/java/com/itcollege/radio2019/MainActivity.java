@@ -292,8 +292,10 @@ public class MainActivity extends AppCompatActivity implements
                 case C.MUSICSERVICE_INTENT_SONGINFO:
                     mMusicServiceStarted = true;
                     mMusicPlayerStatus = C.MUSICSERVICE_PLAYING;
+                    int stationId = intent.getIntExtra(C.MUSICSERVICE_STATION, 1);
                     for (Station station : mStations) {
-                        if (station.getStationId() == intent.getIntExtra(C.SAVE_STATE_SELECTED_STATION, 1)) {
+
+                        if (station.getStationId() == stationId) {
                             mSelectedStation = station;
                         }
                     }
