@@ -23,7 +23,14 @@ class GameBrain {
     var isSolved = false
     
     init() {
+        var counter = 1;
         gameBoard = Array(repeating: Array(repeating: -1, count: 4), count: 4)
+        for i in 0...3{
+            for j in 0...3{
+                gameBoard[i][j] = counter
+                counter += 1
+            }
+        }
     }
     
     func randomize() {
