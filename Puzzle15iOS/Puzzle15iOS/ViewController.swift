@@ -63,6 +63,7 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         randomizeButton.layer.cornerRadius = 5
         randomizeButton.layer.masksToBounds = true
+        randomizeButton.contentEdgeInsets = UIEdgeInsets(top: 5,left: 5,bottom: 5,right: 5)
         
         for btn in gameButtons {
             btn.layer.cornerRadius = 5
