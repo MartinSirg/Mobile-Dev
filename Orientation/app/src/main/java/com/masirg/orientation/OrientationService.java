@@ -23,6 +23,13 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.masirg.orientation.Domain.Track;
+import com.masirg.orientation.Domain.TrackCheckpoint;
+import com.masirg.orientation.Domain.TrackPoint;
+import com.masirg.orientation.Reposiotories.TrackCheckpointsRepository;
+import com.masirg.orientation.Reposiotories.TrackPointsRepository;
+import com.masirg.orientation.Reposiotories.TracksRepository;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -41,7 +48,6 @@ public class OrientationService extends Service implements LocationListener {
 
     private List<Location> mLocationsCache = new ArrayList<>();
     private List<Location> mCheckpointLocations = new ArrayList<>();
-    private List<Location> mAllTrackLocations = new ArrayList<>();
 
     private int mTimeSinceLastWaypoint = -1;
     private int mTimeSinceLastCheckpoint = -1;
@@ -54,6 +60,11 @@ public class OrientationService extends Service implements LocationListener {
     private Location startingLocation;
     private Location mLastWaypointLocation;
     private Location mLastLocation;
+    private Track mTrack;
+
+    private TrackPointsRepository mPointsRepository;
+    private TracksRepository mTracksRepository;
+    private TrackCheckpointsRepository mCheckpointsRepository;
 
 
     @Override
@@ -96,16 +107,34 @@ public class OrientationService extends Service implements LocationListener {
 
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver, intentFilter);
 
+        TracksRepository repository = new TracksRepository(this);
+        repository.open();
+        mTrack = repository.add(new Track(System.currentTimeMillis() /  1000));
+        repository.close();
+        Log.d(TAG, "Track : " + mTrack.toString() );
+
         startTimer();
+        mTracksRepository = new TracksRepository(this);
+        mPointsRepository = new TrackPointsRepository(this);
+        mCheckpointsRepository = new TrackCheckpointsRepository(this);
+
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy: ");
         if (locationManager != null) locationManager.removeUpdates(this);
         if (mScheduledExecutorService != null) mScheduledExecutorService.shutdown();
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mBroadcastReceiver);
-        Log.d(TAG, "onDestroy: ");
+
+        mTrack.setTotalDistance(mDistanceSinceStart);
+        mTrack.setTotalTime(mTimeSinceStart);
+        mTrack.setDescription("-");
+
+        mTracksRepository.open();
+        mTracksRepository.update(mTrack);
+        mTracksRepository.close();
     }
 
     //=================================================================
@@ -117,8 +146,7 @@ public class OrientationService extends Service implements LocationListener {
     //================================================================
     @Override
     public void onLocationChanged(Location location) {
-        mAllTrackLocations.add(location);
-        //TODO: save db instead of piling all the locations (Bad for memory)
+        saveTrackPointToDb(location);
         if (startingLocation == null) {
             mDistanceSinceStart = 0;
             mTimeSinceStart = 0;
@@ -242,6 +270,38 @@ public class OrientationService extends Service implements LocationListener {
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
+    //=================================================================
+
+    private void saveTrackPointToDb(Location location) {
+        TrackPoint trackPoint = new TrackPoint(
+                mTrack.getTrackId(),
+                location.getLatitude(),
+                location.getLongitude(),
+                location.getAltitude(),
+                System.currentTimeMillis() / 1000
+                );
+        mPointsRepository.open();
+        long id = mPointsRepository.add(trackPoint);
+        mPointsRepository.close();
+
+        Log.d(TAG, "saveTrackPointToDb: id = " + id);
+    }
+
+    private void saveCheckpointToDb(Location location){
+        TrackCheckpoint checkpoint = new TrackCheckpoint(
+                mTrack.getTrackId(),
+                location.getLatitude(),
+                location.getLongitude(),
+                location.getAltitude(),
+                System.currentTimeMillis() / 1000
+        );
+        mCheckpointsRepository.open();
+        long id = mCheckpointsRepository.add(checkpoint);
+        mCheckpointsRepository.close();
+
+        Log.d(TAG, "saveCheckpointToDb: id = " + id);
+    }
+
     //===============================================================
     public class OrientationServiceBroadcastReceiver extends BroadcastReceiver {
 
@@ -285,6 +345,7 @@ public class OrientationService extends Service implements LocationListener {
 
                 case C.MAPS_ACTIVITY_INTENT_ADD_CHECKPOINT:
                     mCheckpointLocations.add(location);
+                    saveCheckpointToDb(location);
                     mDistanceSinceLastCheckpoint = 0;
                     mTimeSinceLastCheckpoint = 0;
 

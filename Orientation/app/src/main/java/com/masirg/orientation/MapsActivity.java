@@ -79,12 +79,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate: ");
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.mapOld);
         mapFragment.getMapAsync(this);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -93,9 +93,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         //Find text views from UI
-        mTotalDistanceTextView = findViewById(R.id.totalDistance);
-        mTotalTimeTextView = findViewById(R.id.totalTime);
-        mTotalPaceTextView = findViewById(R.id.totalPace);
+        mTotalDistanceTextView = findViewById(R.id.totalDistanceOld);
+        mTotalTimeTextView = findViewById(R.id.totalTimeOld);
+        mTotalPaceTextView = findViewById(R.id.totalPaceOld);
 
         mCheckpointDistanceTextView = findViewById(R.id.checkPointDistance);
         mCheckpointDirectDistanceTextView = findViewById(R.id.checkPointDirectDistance);
@@ -119,7 +119,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         intentFilter.addAction(C.ORIENTATION_SERVICE_INTENT_STATS_UPDATE);
 
         //Broadcast receiver
-
         mBroadcastReceiver = new MapsActivityBroadcastReceiver();
 
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver, intentFilter);
@@ -173,27 +172,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d(TAG, "onSaveInstanceState: mService is started = " + mServiceStarted);
         outState.putBoolean(C.INSTANCE_STATE_SERVICE_STARTED, mServiceStarted);
 
-        double[] latitudes = new double[mPolylineOptions.getPoints().size()];
-        double[] longitudes = new double[mPolylineOptions.getPoints().size()];
-        for (int i = 0; i < mPolylineOptions.getPoints().size(); i++) {
-            latitudes[i] = mPolylineOptions.getPoints().get(i).latitude;
-            longitudes[i] = mPolylineOptions.getPoints().get(i).longitude;
+        if (mPolylineOptions != null){
+            double[] latitudes = new double[mPolylineOptions.getPoints().size()];
+            double[] longitudes = new double[mPolylineOptions.getPoints().size()];
+            for (int i = 0; i < mPolylineOptions.getPoints().size(); i++) {
+                latitudes[i] = mPolylineOptions.getPoints().get(i).latitude;
+                longitudes[i] = mPolylineOptions.getPoints().get(i).longitude;
+
+                outState.putDoubleArray(C.INSTANCE_STATE_LOCATIONS_LATITUDES, latitudes);
+                outState.putDoubleArray(C.INSTANCE_STATE_LOCATIONS_LONGITUDES, longitudes);
+            }
         }
 
-        double[] checkpointLatitudes = new double[mCheckPoints.size()];
-        double[] checkpointLongitudes = new double[mCheckPoints.size()];
+        if(mCheckPoints != null && mCheckPoints.size() != 0){
+            double[] checkpointLatitudes = new double[mCheckPoints.size()];
+            double[] checkpointLongitudes = new double[mCheckPoints.size()];
 
-        for (int i = 0; i < mCheckPoints.size(); i++) {
-            checkpointLatitudes[i] = mCheckPoints.get(i).getPosition().latitude;
-            checkpointLongitudes[i] = mCheckPoints.get(i).getPosition().longitude;
-        }
-
-        outState.putDoubleArray(C.INSTANCE_STATE_LOCATIONS_LATITUDES, latitudes);
-        outState.putDoubleArray(C.INSTANCE_STATE_LOCATIONS_LONGITUDES, longitudes);
-
-        if (checkpointLatitudes.length > 0){
-            outState.putDoubleArray(C.INSTANCE_STATE_CHECKPOINT_LOCATIONS_LATITUDES, checkpointLatitudes);
-            outState.putDoubleArray(C.INSTANCE_STATE_CHECKPOINT_LOCATIONS_LONGITUDES, checkpointLongitudes);
+            for (int i = 0; i < mCheckPoints.size(); i++) {
+                checkpointLatitudes[i] = mCheckPoints.get(i).getPosition().latitude;
+                checkpointLongitudes[i] = mCheckPoints.get(i).getPosition().longitude;
+                outState.putDoubleArray(C.INSTANCE_STATE_CHECKPOINT_LOCATIONS_LATITUDES, checkpointLatitudes);
+                outState.putDoubleArray(C.INSTANCE_STATE_CHECKPOINT_LOCATIONS_LONGITUDES, checkpointLongitudes);
+            }
         }
 
         if (mLastWaypointMarker != null){
@@ -304,6 +304,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
         if (mSavedCheckpointsLatLngs != null){
             for (LatLng latLng : mSavedCheckpointsLatLngs) {
                 mCheckPoints.add(mMap.addMarker(new MarkerOptions()
@@ -319,8 +320,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                     .title("Waypoint"));
         }
-
-
         if (mPolylineOptions != null) {
             Log.d(TAG, "onMapReady: Placing previous points on map");
             mPolyLine = mMap.addPolyline(mPolylineOptions);
@@ -372,6 +371,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d(TAG, "addWaypointButtonClicked: ");
         Intent waypointIntent = new Intent(C.MAPS_ACTIVITY_INTENT_ADD_WAYPOINT);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(waypointIntent);
+    }
+
+    public void optionsButtonClicked(View view) {
+        Intent intent = new Intent(this, TracksHistoryActivity.class);
+        this.startActivity(intent);
     }
 
     //=======================================
