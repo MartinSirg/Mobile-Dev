@@ -7,6 +7,8 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
+
+
     <fragment
         android:id="@+id/mapOld"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -228,11 +230,11 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:onClick="clearButtonClicked"
         android:id="@+id/button2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:onClick="clearButtonClicked"
         android:text="Clear"
         android:textSize="12sp"
         app:layout_constraintEnd_toStartOf="@+id/compassToggleButton"
@@ -282,6 +284,27 @@
         android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@+id/guidelineHorizontalOld"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintGuide_percent=".3" />
+
+    <ImageView
+        android:id="@+id/compassImageView"
+        android:visibility="invisible"
+        android:layout_width="0dp"
+        app:layout_constraintDimensionRatio="1:1"
+        android:layout_height="0dp"
+        android:src="@drawable/compass"
+        app:layout_constraintBottom_toBottomOf="@id/guidelineHorizontalOld"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintTop_toTopOf="@id/guideline2" />
 
 
 </android.support.constraint.ConstraintLayout>

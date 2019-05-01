@@ -8,6 +8,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -18,7 +22,10 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -44,13 +51,22 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
         ConfirmStopDialog.ConfirmStopDialogListener,
-        LocationListener {
+        LocationListener,
+        SensorEventListener {
 
     private static final String TAG = "MapsActivity";
     private static final float DEFAULT_ZOOM = 16;
     private GoogleMap mMap;
     private LocationManager locationManager;
     private String provider;
+
+    // ======================================
+
+    private float[] mGravity = new float[3];
+    private float[] mGeoMagnetic = new float[3];
+    private float mAzimuth = 0f;
+    private float mCurrentAzimuth = 0f;
+    private SensorManager mSensorManager;
 
     // ========== TextView elements ==========
 
@@ -66,6 +82,7 @@ public class MapsActivity extends FragmentActivity implements
     private TextView mWaypointDirectDistanceTextView;
     private TextView mWaypointPaceTextView;
     private Button mStartStopButton;
+    private ImageView mCompassImageView;
 
     private boolean mServiceStarted = false;
     private MapsActivityBroadcastReceiver mBroadcastReceiver;
@@ -125,6 +142,12 @@ public class MapsActivity extends FragmentActivity implements
         mNorthUpToggleButton = findViewById(R.id.northUpToggleButton);
         mCenterToggleButton = findViewById(R.id.centerToggleButton);
         mCompassToggleButton = findViewById(R.id.compassToggleButton);
+
+        // ===========================Compass===========================
+        mCompassImageView = findViewById(R.id.compassImageView);
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+
+
 
         setUpToggleButtonListeners();
 
@@ -216,13 +239,24 @@ public class MapsActivity extends FragmentActivity implements
         mCompassToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.d(TAG, "Compass Toggled = " + isChecked);
             mCompassToggled = isChecked;
-            //TODO:
+            if (isChecked){
+                mCompassImageView.setVisibility(View.VISIBLE);
+            }else {
+                mCompassImageView.setVisibility(View.INVISIBLE);
+            }
         });
     }
 
     protected void onResume() {
         Log.d(TAG, "onResume: ");
         super.onResume();
+        mSensorManager.registerListener(this,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+                SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_GAME);
+
         if (mServiceStarted) {
             Intent intent = new Intent(C.MAPS_ACTIVITY_INTENT_STOP_COLLECT_IN_BACKGROUND);
             LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
@@ -235,6 +269,7 @@ public class MapsActivity extends FragmentActivity implements
         super.onPause();
         Intent intent = new Intent(C.MAPS_ACTIVITY_INTENT_COLLECT_IN_BACKGROUND);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+        mSensorManager.unregisterListener(this);
     }
 
     @Override
@@ -328,9 +363,7 @@ public class MapsActivity extends FragmentActivity implements
         mCenterToggled = savedInstanceState.getBoolean(C.INSTANCE_STATE_CENTER_TOGGLED, false);
 
         mCompassToggled = savedInstanceState.getBoolean(C.INSTANCE_STATE_COMPASS_TOGGLED, false);
-        if (mCompassToggled){
-            //TODO:
-        }
+        mCompassToggleButton.setChecked(mCompassToggled);
 
         mPolylineOptions = new PolylineOptions()
                 .color(Color.RED)
@@ -622,6 +655,48 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public void onProviderDisabled(String provider) {
+
+    }
+
+    //================================== Sensor events ==================================
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        final float alpha = 0.97f;
+        synchronized (this){
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+                mGravity[0] = alpha * mGravity[0] + (1 - alpha) * event.values[0];
+                mGravity[1] = alpha * mGravity[1] + (1 - alpha) * event.values[1];
+                mGravity[2] = alpha * mGravity[1] + (1 - alpha) * event.values[2];
+            }
+
+            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
+                mGeoMagnetic[0] = alpha * mGeoMagnetic[0] + (1 - alpha) * event.values[0];
+                mGeoMagnetic[1] = alpha * mGeoMagnetic[1] + (1 - alpha) * event.values[1];
+                mGeoMagnetic[2] = alpha * mGeoMagnetic[1] + (1 - alpha) * event.values[2];
+            }
+
+            float R[] = new float[9];
+            float I[] = new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeoMagnetic);
+            if (success){
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(R, orientation);
+                mAzimuth = (float)Math.toDegrees(orientation[0]);
+                mAzimuth = (mAzimuth + 360) % 360;
+
+                if (!mCompassToggled) return;
+                Animation anim = new RotateAnimation(-mCurrentAzimuth, -mAzimuth, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+                mCurrentAzimuth = mAzimuth;
+                anim.setDuration(500);
+                anim.setRepeatCount(0);
+                mCompassImageView.startAnimation(anim);
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
 
