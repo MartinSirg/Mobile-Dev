@@ -1,5 +1,7 @@
 package com.masirg.orientation;
 
+import android.content.Context;
+
 public class  C {
     public static final String NOTIFICATION_CHANNEL_1 = "NOTIFICATION_CHANNEL_1";
 
@@ -57,4 +59,7 @@ public class  C {
 
     public static final String TRACK_ID = "TRACK_ID";
     public static final String START_OLD_TRACK_ACTIVITY_BUNDLE = "START_OLD_TRACK_ACTIVITY_BUNDLE";
+
+    public static final String NOTIFICATION_INTENT_ADD_CP = "com.masirg.orientation.addNewCheckpoint";
+    public static final String NOTIFICATION_INTENT_ADD_WP = "com.masirg.orientation.addNewWaypoint";
 }

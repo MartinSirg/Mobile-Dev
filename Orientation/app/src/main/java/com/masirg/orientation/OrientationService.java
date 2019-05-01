@@ -1,6 +1,7 @@
 package com.masirg.orientation;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -20,8 +21,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.masirg.orientation.Activities.MapsActivity;
 import com.masirg.orientation.Domain.Track;
@@ -49,6 +52,8 @@ public class OrientationService extends Service implements LocationListener {
 
     private List<Location> mLocationsCache = new ArrayList<>();
     private List<Location> mCheckpointLocations = new ArrayList<>();
+    private List<Location> mCheckpointsCache = new ArrayList<>();
+    private Location mWaypointCache;
 
     private int mTimeSinceLastWaypoint = -1;
     private int mTimeSinceLastCheckpoint = -1;
@@ -66,6 +71,9 @@ public class OrientationService extends Service implements LocationListener {
     private TrackPointsRepository mPointsRepository;
     private TracksRepository mTracksRepository;
     private TrackCheckpointsRepository mCheckpointsRepository;
+    private NotificationReceiver mNotificationReceiver;
+    private RemoteViews mNotificationCollapsedView;
+    private RemoteViews mNotificationExpandedView;
 
 
     @Override
@@ -128,6 +136,7 @@ public class OrientationService extends Service implements LocationListener {
         if (locationManager != null) locationManager.removeUpdates(this);
         if (mScheduledExecutorService != null) mScheduledExecutorService.shutdown();
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mBroadcastReceiver);
+        unregisterReceiver(mNotificationReceiver);
 
         mTrack.setTotalDistance(mDistanceSinceStart);
         mTrack.setTotalTime(mTimeSinceStart);
@@ -212,23 +221,50 @@ public class OrientationService extends Service implements LocationListener {
 
     private void createNotification() {
         Log.d(TAG, "createNotification: ");
-        Intent intent = new Intent(this, MapsActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        mNotificationCollapsedView = new RemoteViews(getPackageName(),
+                R.layout.notification_collapsed);
+
+        mNotificationExpandedView = new RemoteViews(getPackageName(),
+                R.layout.notification_expanded);
+
+        setUpRemoteViews();
+
+
 
         Notification notification = new NotificationCompat.Builder(this, C.NOTIFICATION_CHANNEL_1)
                 .setSmallIcon(R.mipmap.ic_launcher_round)
-                .setContentTitle("Title")
-                .setContentText("Longer text")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setCustomContentView(mNotificationCollapsedView)
+                .setCustomBigContentView(mNotificationExpandedView)
 //                .setAutoCancel(true)
-                .setContentIntent(pendingIntent)
+//                .setContentIntent(pendingIntent)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .build();
 
 //        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
         startForeground(2, notification);
+    }
+
+    private void setUpRemoteViews() {
+        mNotificationReceiver = new NotificationReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(C.NOTIFICATION_INTENT_ADD_CP);
+        filter.addAction(C.NOTIFICATION_INTENT_ADD_WP);
+        this.registerReceiver(mNotificationReceiver, filter);
+
+
+        Intent openActivity = new Intent(this, MapsActivity.class);
+        openActivity.setAction(Intent.ACTION_MAIN);
+        openActivity.addCategory(Intent.CATEGORY_LAUNCHER);
+        PendingIntent pendingIntentOpenActivity = PendingIntent.getActivity(this, 0, openActivity, 0);
+
+        PendingIntent checkPointPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(C.NOTIFICATION_INTENT_ADD_CP), 0);
+        PendingIntent wayPointPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(C.NOTIFICATION_INTENT_ADD_WP), 0);
+        mNotificationExpandedView.setOnClickPendingIntent(R.id.ncAddWaypointButton, wayPointPendingIntent);
+        mNotificationExpandedView.setOnClickPendingIntent(R.id.ncAddCheckpointButton, checkPointPendingIntent);
+        mNotificationExpandedView.setOnClickPendingIntent(R.id.ncGoToAppButton, pendingIntentOpenActivity);
     }
 
     //=================================================================
@@ -247,28 +283,94 @@ public class OrientationService extends Service implements LocationListener {
     private void sendStatisticsUpdate() {
         Log.d(TAG, "sendStatisticsUpdate: ");
         if (mLastLocation == null || startingLocation == null) return;
-        if (mCollectDataInBackground) return;
-        Intent intent = new Intent(C.ORIENTATION_SERVICE_INTENT_STATS_UPDATE);
+        if (!mCollectDataInBackground){
+            Intent intent = new Intent(C.ORIENTATION_SERVICE_INTENT_STATS_UPDATE);
 
-        intent.putExtra(C.ORIENTATION_SERVICE_TOTAL_DISTANCE, mDistanceSinceStart);
-        intent.putExtra(C.ORIENTATION_SERVICE_TOTAL_TIME, mTimeSinceStart);
+            intent.putExtra(C.ORIENTATION_SERVICE_TOTAL_DISTANCE, mDistanceSinceStart);
+            intent.putExtra(C.ORIENTATION_SERVICE_TOTAL_TIME, mTimeSinceStart);
 
-        if (mCheckpointLocations != null && mCheckpointLocations.size() > 0){
-            intent.putExtra(C.ORIENTATION_SERVICE_CHECKPOINT_DISTANCE, mDistanceSinceLastCheckpoint);
-            double directDistance = mLastLocation
-                    .distanceTo(mCheckpointLocations.get(mCheckpointLocations.size() - 1));
+            if (mCheckpointLocations != null && mCheckpointLocations.size() > 0){
+                intent.putExtra(C.ORIENTATION_SERVICE_CHECKPOINT_DISTANCE, mDistanceSinceLastCheckpoint);
+                double directDistance = mLastLocation
+                        .distanceTo(mCheckpointLocations.get(mCheckpointLocations.size() - 1));
 
-            intent.putExtra(C.ORIENTATION_SERVICE_CHECKPOINT_DIRECT_DISTANCE, directDistance);
-            intent.putExtra(C.ORIENTATION_SERVICE_CHECKPOINT_TIME, mTimeSinceLastCheckpoint);
+                intent.putExtra(C.ORIENTATION_SERVICE_CHECKPOINT_DIRECT_DISTANCE, directDistance);
+                intent.putExtra(C.ORIENTATION_SERVICE_CHECKPOINT_TIME, mTimeSinceLastCheckpoint);
+            }
+
+            if (mLastWaypointLocation != null){
+                intent.putExtra(C.ORIENTATION_SERVICE_WAYPOINT_DISTANCE, mDistanceSinceLastWaypoint);
+                double directDistance = mLastLocation.distanceTo(mLastWaypointLocation);
+                intent.putExtra(C.ORIENTATION_SERVICE_WAYPOINT_DIRECT_DISTANCE, directDistance);
+                intent.putExtra(C.ORIENTATION_SERVICE_WAYPOINT_TIME, mTimeSinceLastWaypoint);
+            }
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+        }
+        if (mNotificationCollapsedView != null){
+            updateNotification();
+
         }
 
-        if (mLastWaypointLocation != null){
-            intent.putExtra(C.ORIENTATION_SERVICE_WAYPOINT_DISTANCE, mDistanceSinceLastWaypoint);
-            double directDistance = mLastLocation.distanceTo(mLastWaypointLocation);
-            intent.putExtra(C.ORIENTATION_SERVICE_WAYPOINT_DIRECT_DISTANCE, directDistance);
-            intent.putExtra(C.ORIENTATION_SERVICE_WAYPOINT_TIME, mTimeSinceLastWaypoint);
+    }
+
+    @SuppressLint("DefaultLocale")
+    private void updateNotification() {
+        mNotificationCollapsedView.setTextViewText(R.id.ncTotalTime, String.format("Time: %d:%02d:%02d", mTimeSinceStart / 3600, mTimeSinceStart / 60 , mTimeSinceStart % 60));
+        mNotificationExpandedView.setTextViewText(R.id.ncTotalTime, String.format("Time: %d:%02d:%02d", mTimeSinceStart / 3600, mTimeSinceStart / 60 , mTimeSinceStart % 60));
+
+        mNotificationCollapsedView.setTextViewText(R.id.ncTotalDistance,String.format("Dist: %.0f m", mDistanceSinceStart));
+        mNotificationExpandedView.setTextViewText(R.id.ncTotalDistance,String.format("Dist: %.0f m", mDistanceSinceStart));
+
+        if (mDistanceSinceStart > 0){
+            double minsPerKm = (mTimeSinceStart * 50.0) / (mDistanceSinceStart * 3);
+
+            mNotificationCollapsedView.setTextViewText(R.id.ncTotalPace, String.format("Pace: %.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
+            mNotificationExpandedView.setTextViewText(R.id.ncTotalPace, String.format("Pace:%.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
         }
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+        if (mDistanceSinceLastCheckpoint != -1){
+            mNotificationCollapsedView.setTextViewText(R.id.ncCheckpointDistance, String.format("Dist: %.0f m", mDistanceSinceLastCheckpoint));
+            mNotificationExpandedView.setTextViewText(R.id.ncCheckpointDistance, String.format("Dist: %.0f m", mDistanceSinceLastCheckpoint));
+
+            mNotificationCollapsedView.setTextViewText(R.id.ncCheckpointDirectDistance, String.format("Direct: %.0f m", mCheckpointLocations.get(mCheckpointLocations.size() - 1).distanceTo(mLastLocation)));
+            mNotificationExpandedView.setTextViewText(R.id.ncCheckpointDirectDistance, String.format("Direct: %.0f m", mCheckpointLocations.get(mCheckpointLocations.size() - 1).distanceTo(mLastLocation)));
+
+            if (mDistanceSinceLastCheckpoint > 0){
+                double minsPerKm = (mTimeSinceLastCheckpoint * 50.0) / (mDistanceSinceLastCheckpoint * 3);
+                mNotificationCollapsedView.setTextViewText(R.id.ncCheckpointPace, String.format("Pace: %.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
+                mNotificationExpandedView.setTextViewText(R.id.ncCheckpointPace, String.format("Pace: %.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
+            } else {
+                mNotificationCollapsedView.setTextViewText(R.id.ncCheckpointPace, "Pace: -");
+                mNotificationExpandedView.setTextViewText(R.id.ncCheckpointPace, "Pace: -");
+            }
+        }
+
+        if (mDistanceSinceLastWaypoint != -1){
+            mNotificationCollapsedView.setTextViewText(R.id.ncWaypointDistance, String.format("Dist: %.0f m", mDistanceSinceLastWaypoint));
+            mNotificationExpandedView.setTextViewText(R.id.ncWaypointDistance, String.format("Dist: %.0f m", mDistanceSinceLastWaypoint));
+
+            mNotificationCollapsedView.setTextViewText(R.id.ncWaypointDirectDistance, String.format("Direct: %.0f m", mLastWaypointLocation.distanceTo(mLastLocation)));
+            mNotificationExpandedView.setTextViewText(R.id.ncWaypointDirectDistance, String.format("Direct: %.0f m", mLastWaypointLocation.distanceTo(mLastLocation)));
+
+            if (mDistanceSinceLastWaypoint > 0){
+                double minsPerKm = (mTimeSinceLastWaypoint * 50.0) / (mDistanceSinceLastWaypoint * 3);
+                mNotificationCollapsedView.setTextViewText(R.id.ncWaypointPace, String.format("Pace :%.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
+                mNotificationExpandedView.setTextViewText(R.id.ncWaypointPace, String.format("Pace :%.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
+            }else {
+                mNotificationCollapsedView.setTextViewText(R.id.ncWaypointPace, "Pace: -");
+                mNotificationExpandedView.setTextViewText(R.id.ncWaypointPace, "Pace: -");
+            }
+        }
+
+        Notification notification = new NotificationCompat.Builder(this, C.NOTIFICATION_CHANNEL_1)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setCustomContentView(mNotificationCollapsedView)
+                .setCustomBigContentView(mNotificationExpandedView)
+//                .setAutoCancel(true)
+//                .setContentIntent(pendingIntent)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .build();
+        NotificationManagerCompat.from(this).notify(2,notification);
     }
 
     //=================================================================
@@ -304,6 +406,61 @@ public class OrientationService extends Service implements LocationListener {
     }
 
     //===============================================================
+    public class NotificationReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive: ");
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            Location location = locationManager.getLastKnownLocation(provider);
+            switch (intent.getAction()){
+                case C.NOTIFICATION_INTENT_ADD_CP:
+                    Log.d(TAG, "onReceive: new cp");
+                    mCheckpointLocations.add(location);
+                    saveCheckpointToDb(location);
+                    mDistanceSinceLastCheckpoint = 0;
+                    mTimeSinceLastCheckpoint = 0;
+
+                    if (mCollectDataInBackground){
+                        mCheckpointsCache.add(location);
+                    } else {
+                        Intent checkpointIntent = new Intent(C.ORIENTATION_SERVICE_INTENT_NEW_CHECKPOINT);
+                        checkpointIntent.putExtra(C.ORIENTATION_SERVICE_LATITUDE, location.getLatitude());
+                        checkpointIntent.putExtra(C.ORIENTATION_SERVICE_LONGITUDE, location.getLongitude());
+                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(checkpointIntent);
+                    }
+                    sendStatisticsUpdate();
+                    break;
+                case C.NOTIFICATION_INTENT_ADD_WP:
+                    Log.d(TAG, "onReceive: new wp");
+                    mLastWaypointLocation = location;
+                    mDistanceSinceLastWaypoint = 0;
+                    mTimeSinceLastWaypoint = 0;
+
+                    if (mCollectDataInBackground){
+                        mWaypointCache = location;
+                    } else {
+                        Intent waypointIntent = new Intent(C.ORIENTATION_SERVICE_INTENT_NEW_WAYPOINT);
+                        waypointIntent.putExtra(C.ORIENTATION_SERVICE_LATITUDE, location.getLatitude());
+                        waypointIntent.putExtra(C.ORIENTATION_SERVICE_LONGITUDE, location.getLongitude());
+                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(waypointIntent);
+                    }
+                    sendStatisticsUpdate();
+
+                    break;
+            }
+        }
+    }
+
     public class OrientationServiceBroadcastReceiver extends BroadcastReceiver {
 
         @Override
@@ -341,6 +498,23 @@ public class OrientationService extends Service implements LocationListener {
                     Intent sendIntent = new Intent(C.ORIENTATION_SERVICE_INTENT_BACKGROUND_LOCATIONS_UPDATE);
                     sendIntent.putExtra(C.ORIENTATION_SERVICE_LATITUDES, latitudes);
                     sendIntent.putExtra(C.ORIENTATION_SERVICE_LONGITUDES, longitudes);
+                    if (mCheckpointsCache.size() > 0 ){
+                        for (Location l : mCheckpointsCache) {
+                            Intent checkpointIntent = new Intent(C.ORIENTATION_SERVICE_INTENT_NEW_CHECKPOINT);
+                            checkpointIntent.putExtra(C.ORIENTATION_SERVICE_LATITUDE, l.getLatitude());
+                            checkpointIntent.putExtra(C.ORIENTATION_SERVICE_LONGITUDE, l.getLongitude());
+                            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(checkpointIntent);
+                        }
+                        mCheckpointsCache.clear();
+                    }
+                    if (mWaypointCache != null) {
+                        Intent waypointIntent = new Intent(C.ORIENTATION_SERVICE_INTENT_NEW_WAYPOINT);
+                        waypointIntent.putExtra(C.ORIENTATION_SERVICE_LATITUDE, location.getLatitude());
+                        waypointIntent.putExtra(C.ORIENTATION_SERVICE_LONGITUDE, location.getLongitude());
+                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(waypointIntent);
+                        mWaypointCache = null;
+                    }
+
                     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(sendIntent);
                     break;
 
@@ -354,6 +528,7 @@ public class OrientationService extends Service implements LocationListener {
                     checkpointIntent.putExtra(C.ORIENTATION_SERVICE_LATITUDE, location.getLatitude());
                     checkpointIntent.putExtra(C.ORIENTATION_SERVICE_LONGITUDE, location.getLongitude());
                     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(checkpointIntent);
+                    sendStatisticsUpdate();
                     break;
 
                 case C.MAPS_ACTIVITY_INTENT_ADD_WAYPOINT:
@@ -365,6 +540,7 @@ public class OrientationService extends Service implements LocationListener {
                     waypointIntent.putExtra(C.ORIENTATION_SERVICE_LATITUDE, location.getLatitude());
                     waypointIntent.putExtra(C.ORIENTATION_SERVICE_LONGITUDE, location.getLongitude());
                     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(waypointIntent);
+                    sendStatisticsUpdate();
                     break;
             }
         }

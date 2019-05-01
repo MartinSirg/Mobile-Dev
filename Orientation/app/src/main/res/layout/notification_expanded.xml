@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="256dp"
+    android:layout_margin="8dp"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/totalTitle"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            android:text="Total"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/ncTotalDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncTotalTime"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncTotalPace"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <ImageButton
+            android:id="@+id/ncGoToAppButton"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="50"
+            android:src="@mipmap/ic_launcher_round"
+            android:text="Button" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/checkPointTitle"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            android:text="Checkpoint"
+            android:textAlignment="gravity"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/ncCheckpointDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncCheckpointDirectDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncCheckpointPace"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/ncAddCheckpointButton"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="50"
+            android:text="add CP"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/waypointTitle"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            android:text="Waypoint"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/ncWaypointDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncWaypointDirectDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncWaypointPace"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="20"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/ncAddWaypointButton"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="50"
+            android:text="Add wp"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+</LinearLayout>
