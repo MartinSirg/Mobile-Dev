@@ -34,15 +34,14 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements
+        OnMapReadyCallback,
+        ConfirmStopDialog.ConfirmStopDialogListener {
 
     private static final String TAG = "MapsActivity";
     private GoogleMap mMap;
     private LocationManager locationManager;
     private String provider;
-    private PolylineOptions mPolylineOptions;
-
-    private Marker mLastWaypointMarker;
 
     // ========== TextView elements ==========
 
@@ -61,8 +60,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private boolean mServiceStarted = false;
     private MapsActivityBroadcastReceiver mBroadcastReceiver;
+
     private Polyline mPolyLine;
     private List<Marker> mCheckPoints = new ArrayList<>();
+    private PolylineOptions mPolylineOptions;
+    private Marker mLastWaypointMarker;
 
     private List<LatLng> mSavedCheckpointsLatLngs;
     private LatLng mSavedWaypointLatLng;
@@ -340,25 +342,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //=======================================
     public void startStopButtonClicked(View view) {
-        Log.d(TAG, "startStopButtonClicked: ");
+
         if (!mServiceStarted) {
+            Log.d(TAG, "startStopButtonClicked: START");
             ((Button) view).setText("STOP");
+            clearMap();
             mServiceStarted = true;
 
             Intent intentStartService = new Intent(this, OrientationService.class);
             this.startService(intentStartService);
-
-            if (mPolyLine != null) mPolyLine.remove();
             mPolylineOptions = new PolylineOptions().width(10).color(Color.RED);
             mPolyLine = mMap.addPolyline(mPolylineOptions);
         } else {
-            //TODO: double check are you sure you want to stop
-            ((Button) view).setText("START");
-            mServiceStarted = false;
-            Intent intentStopService = new Intent(this, OrientationService.class);
-            this.stopService(intentStopService);
+            Log.d(TAG, "startStopButtonClicked: STOP");
+            ConfirmStopDialog dialog = new ConfirmStopDialog();
+            dialog.show(getSupportFragmentManager(), "stopConfirmDialog");
         }
-
     }
 
     public void addCheckpointButtonClicked(View view) {
@@ -378,11 +377,52 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.startActivity(intent);
     }
 
+    public void clearButtonClicked(View view) {
+        clearMap();
+    }
+
+    @Override
+    public void OnStopConfirmedClicked() {
+        Log.d(TAG, "OnStopConfirmedClicked: ");
+        mStartStopButton.setText("START");
+        mServiceStarted = false;
+        Intent intentStopService = new Intent(this, OrientationService.class);
+        this.stopService(intentStopService);
+    }
+
+
     //=======================================
+
+    private void clearMap() {
+        Log.d(TAG, "clearMap: ");
+        if (mServiceStarted) return;
+        if (mPolylineOptions != null) mPolylineOptions = null;
+        if (mPolyLine != null) mPolyLine.remove();
+        if (mLastWaypointMarker != null) mLastWaypointMarker.remove();
+        if (mCheckPoints != null && mCheckPoints.size() > 0) {
+            mCheckPoints.forEach(marker -> {
+                Log.d(TAG, "clearMap: Removing checkpoint");
+                marker.remove();
+            });
+        } else {
+            Log.d(TAG, "clearMap: didn't find any checkpoints");
+        }
+        mTotalTime = -1;
+        mTotalDistance = -1;
+
+        mCheckpointDistance = -1;
+        mCheckpointDirectDistance = -1;
+        mCheckpointTime = -1;
+
+        mWaypointDistance = -1;
+        mWaypointDirectDistance = -1;
+        mWaypointTime = -1;
+        updateUI();
+
+    }
 
     @SuppressLint("DefaultLocale")
     public void updateUI() {
-        Log.d(TAG, "updateUI: ");
         if (mTotalDistance == -1) {
             mTotalDistanceTextView.setText("-");
             mTotalTimeTextView.setText("-");
@@ -398,7 +438,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mTotalPaceTextView.setText(String.format("%.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
             }
         }
-
         if (mCheckpointDistance == -1) {
             mCheckpointDistanceTextView.setText("-");
             mCheckpointDirectDistanceTextView.setText("-");

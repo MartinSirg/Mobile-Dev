@@ -54,9 +54,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         if (mItemButtonsClickListener == null) throw new NullPointerException("mItemButtonsClickListener is null. Please set an ItemButtonsClickListener for RecyclerViewAdapter");
 
-        viewHolder.mViewTrackButton.setOnClickListener(v -> mItemButtonsClickListener.onViewButtonClick(track.getTrackId()));
-        viewHolder.mEditTrackButton.setOnClickListener(v -> mItemButtonsClickListener.onEditButtonClick(track.getTrackId()));
-        viewHolder.mDeleteTrackButton.setOnClickListener(v -> mItemButtonsClickListener.onDeleteButtonClick(track.getTrackId()));
+        viewHolder.mViewTrackButton.setOnClickListener(v -> mItemButtonsClickListener.onViewButtonClick(track.getTrackId(), i));
+        viewHolder.mEditTrackButton.setOnClickListener(v -> mItemButtonsClickListener.onEditButtonClick(track.getTrackId(), i));
+        viewHolder.mDeleteTrackButton.setOnClickListener(v -> mItemButtonsClickListener.onDeleteButtonClick(track.getTrackId(), i));
     }
 
     @Override
@@ -101,8 +101,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         void onRecyclerRowItemClick(View view, int position);
     }
     public interface ItemButtonsClickListener {
-        void onEditButtonClick(long trackId);
-        void onViewButtonClick(long trackId);
-        void onDeleteButtonClick(long trackId);
+        void onEditButtonClick(long trackId, int position);
+        void onViewButtonClick(long trackId, int position);
+        void onDeleteButtonClick(long trackId, int position);
     }
 }

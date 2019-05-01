@@ -125,4 +125,18 @@ public class TracksRepository {
         }
         return cursor;
     }
+
+    public void delete(long trackId) {
+        String whereString = DatabaseHelper.TRACK_ID + " = ?";
+        String[] args = {Long.toString(trackId)};
+
+        int deletedRows = db.delete(DatabaseHelper.TRACKS_TABLE_NAME, whereString, args);
+        if (deletedRows == 0){
+            Log.d(TAG, "delete: FAILED");
+        } else if (deletedRows == 1){
+            Log.d(TAG, "delete: SUCCESS");
+        } else {
+            Log.d(TAG, "delete: ERROR, more than one deletion");
+        }
+    }
 }

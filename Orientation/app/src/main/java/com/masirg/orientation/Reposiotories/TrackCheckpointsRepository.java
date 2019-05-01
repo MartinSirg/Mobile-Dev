@@ -85,4 +85,12 @@ public class TrackCheckpointsRepository {
         }
         return cursor;
     }
+
+    public void deleteTrackCheckpoints(long trackId) {
+        String whereString = DatabaseHelper.TRACK_CHECKPOINT_TRACK_ID + " = ?";
+        String[] args = {Long.toString(trackId)};
+
+        int deletedRows = db.delete(DatabaseHelper.TRACK_CHECKPOINT_TABLE_NAME, whereString, args);
+        Log.d(TAG, "deleteTrackCheckpoints: Deleted " + deletedRows + " checkpoints");
+    }
 }

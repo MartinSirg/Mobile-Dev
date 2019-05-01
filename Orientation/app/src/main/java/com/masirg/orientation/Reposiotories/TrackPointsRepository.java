@@ -85,4 +85,12 @@ public class TrackPointsRepository {
         }
         return cursor;
     }
+
+    public void deleteTrackPoints(long trackId) {
+        String whereString = DatabaseHelper.TRACK_POINT_TRACK_ID + " = ?";
+        String[] args = {Long.toString(trackId)};
+
+        int deletedRows = db.delete(DatabaseHelper.TRACK_POINTS_TABLE_NAME, whereString, args);
+        Log.d(TAG, "deleteTrackPoints: Deleted " + deletedRows + " points");
+    }
 }
