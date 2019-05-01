@@ -1,6 +1,5 @@
-package com.masirg.orientation;
+package com.masirg.orientation.Activities;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,7 +8,11 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
+import com.masirg.orientation.C;
+import com.masirg.orientation.Dialogs.ConfirmDeleteDialog;
 import com.masirg.orientation.Domain.Track;
+import com.masirg.orientation.R;
+import com.masirg.orientation.RecyclerViewAdapter;
 import com.masirg.orientation.Reposiotories.TrackCheckpointsRepository;
 import com.masirg.orientation.Reposiotories.TrackPointsRepository;
 import com.masirg.orientation.Reposiotories.TracksRepository;

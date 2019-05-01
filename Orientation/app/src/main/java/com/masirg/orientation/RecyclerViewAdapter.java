@@ -26,7 +26,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ItemButtonsClickListener mItemButtonsClickListener;
     private SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-YYYY HH:mm");
 
-    RecyclerViewAdapter(Context context,
+    public RecyclerViewAdapter(Context context,
                                List<Track> tracks,
                                @NonNull ItemButtonsClickListener buttonsClickListener,
                                @NonNull ItemClickListener itemClickListener) {

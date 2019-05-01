@@ -1,4 +1,4 @@
-package com.masirg.orientation;
+package com.masirg.orientation.Dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

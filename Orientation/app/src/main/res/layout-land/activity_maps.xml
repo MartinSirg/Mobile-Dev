@@ -16,7 +16,7 @@
         app:layout_constraintEnd_toStartOf="@+id/guidelineHorizontalOld"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:context=".MapsActivity" />
+        tools:context=".Activities.MapsActivity" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guidelineHorizontalOld"
@@ -204,16 +204,19 @@
         app:layout_constraintStart_toEndOf="@+id/waypointDirectDistance"
         app:layout_constraintTop_toTopOf="@+id/guidelineVerticalRight" />
 
-    <Button
-        android:id="@+id/button"
+    <ToggleButton
+        android:id="@+id/northUpToggleButton"
+        android:textOff="north-up"
+        android:textOn="north-up"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="North-up"
         android:textSize="12sp"
-        app:layout_constraintEnd_toStartOf="@+id/button5"
+        app:layout_constraintEnd_toStartOf="@+id/button2"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/button6"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
@@ -221,24 +224,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Reset"
+        android:text="Clear"
         android:textSize="12sp"
-        app:layout_constraintEnd_toStartOf="@+id/button6"
+        android:onClick="clearButtonClicked"
+        app:layout_constraintEnd_toStartOf="@+id/centerToggleButton"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/northUpToggleButton"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/button5"
+    <ToggleButton
+        android:textOn="compass"
+        android:textOff="compass"
+        android:id="@+id/compassToggleButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="20dp"
         android:text="compass"
         android:textSize="12sp"
         app:layout_constraintEnd_toStartOf="@+id/totalDistanceOld"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/button"
+        app:layout_constraintStart_toEndOf="@+id/button6"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
@@ -249,7 +255,21 @@
         android:onClick="optionsButtonClicked"
         android:text="Options"
         android:textSize="12sp"
-        app:layout_constraintEnd_toStartOf="@+id/button"
+        app:layout_constraintEnd_toStartOf="@+id/compassToggleButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/centerToggleButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ToggleButton
+        android:textOff="center"
+        android:textOn="center"
+        android:id="@+id/centerToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="center"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/button6"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/button2"
         app:layout_constraintTop_toTopOf="parent" />

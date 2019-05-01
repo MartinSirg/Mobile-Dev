@@ -1,4 +1,4 @@
-package com.masirg.orientation;
+package com.masirg.orientation.Activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -19,26 +20,34 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.masirg.orientation.C;
+import com.masirg.orientation.Dialogs.ConfirmStopDialog;
+import com.masirg.orientation.OrientationService;
+import com.masirg.orientation.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements
         OnMapReadyCallback,
-        ConfirmStopDialog.ConfirmStopDialogListener {
+        ConfirmStopDialog.ConfirmStopDialogListener,
+        LocationListener {
 
     private static final String TAG = "MapsActivity";
+    private static final float DEFAULT_ZOOM = 16;
     private GoogleMap mMap;
     private LocationManager locationManager;
     private String provider;
@@ -77,6 +86,13 @@ public class MapsActivity extends FragmentActivity implements
     private double mCheckpointDirectDistance = -1;
     private double mWaypointDistance = -1;
     private double mWaypointDirectDistance = -1;
+    private ToggleButton mNorthUpToggleButton;
+    private ToggleButton mCompassToggleButton;
+    private ToggleButton mCenterToggleButton;
+
+    private boolean mCenterToggled;
+    private boolean mNorthUpToggled;
+    private boolean mCompassToggled;
 
 
     @Override
@@ -85,9 +101,6 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.mapOld);
-        mapFragment.getMapAsync(this);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
@@ -107,7 +120,13 @@ public class MapsActivity extends FragmentActivity implements
         mWaypointDirectDistanceTextView = findViewById(R.id.waypointDirectDistance);
         mWaypointPaceTextView = findViewById(R.id.waypointPace);
 
-        mStartStopButton =findViewById(R.id.startStopAllButton);
+        mStartStopButton = findViewById(R.id.startStopAllButton);
+
+        mNorthUpToggleButton = findViewById(R.id.northUpToggleButton);
+        mCenterToggleButton = findViewById(R.id.centerToggleButton);
+        mCompassToggleButton = findViewById(R.id.compassToggleButton);
+
+        setUpToggleButtonListeners();
 
         updateUI();
 
@@ -120,10 +139,85 @@ public class MapsActivity extends FragmentActivity implements
         intentFilter.addAction(C.ORIENTATION_SERVICE_INTENT_NEW_WAYPOINT);
         intentFilter.addAction(C.ORIENTATION_SERVICE_INTENT_STATS_UPDATE);
 
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mapOld);
+        mapFragment.getMapAsync(this);
+
         //Broadcast receiver
         mBroadcastReceiver = new MapsActivityBroadcastReceiver();
 
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mBroadcastReceiver, intentFilter);
+    }
+
+    private void setUpToggleButtonListeners() {
+        mNorthUpToggleButton.setChecked(false);
+        mNorthUpToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.d(TAG, "North-Up Toggled = " + isChecked);
+
+            if (mMap == null) {
+                buttonView.setChecked(!isChecked);
+                return;
+            }
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            Location lastLocation = locationManager.getLastKnownLocation(provider);
+
+            if (isChecked) {
+                mMap.getUiSettings().setRotateGesturesEnabled(false);
+                CameraPosition position = CameraPosition.builder()
+                        .target(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()))
+                        .bearing(0)
+                        .zoom(DEFAULT_ZOOM)
+                        .build();
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(position));
+            } else {
+                mMap.getUiSettings().setRotateGesturesEnabled(true);
+            }
+
+            mNorthUpToggled = isChecked;
+        });
+
+        mCenterToggleButton.setChecked(false);
+        mCenterToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.d(TAG, "Center Toggled = " + isChecked);
+
+            if (mMap == null) {
+                buttonView.setChecked(!isChecked);
+                return;
+            }
+
+            Location lastLocation = locationManager.getLastKnownLocation(provider);
+            if (isChecked) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude())));
+                mMap.getUiSettings().setScrollGesturesEnabled(false);
+            } else {
+                mMap.getUiSettings().setScrollGesturesEnabled(true);
+            }
+
+            mCenterToggled = isChecked;
+            if (mServiceStarted) return;
+            if (isChecked) {
+                locationManager.requestLocationUpdates(provider, 1000, 1, this);
+            } else {
+                locationManager.removeUpdates(this);
+            }
+        });
+
+        mCompassToggleButton.setChecked(false);
+        mCompassToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.d(TAG, "Compass Toggled = " + isChecked);
+            mCompassToggled = isChecked;
+            //TODO:
+        });
     }
 
     protected void onResume() {
@@ -146,6 +240,7 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     protected void onStop() {
         Log.d(TAG, "onStop");
+        locationManager.removeUpdates(this);
         super.onStop();
     }
 
@@ -174,7 +269,7 @@ public class MapsActivity extends FragmentActivity implements
         Log.d(TAG, "onSaveInstanceState: mService is started = " + mServiceStarted);
         outState.putBoolean(C.INSTANCE_STATE_SERVICE_STARTED, mServiceStarted);
 
-        if (mPolylineOptions != null){
+        if (mPolylineOptions != null) {
             double[] latitudes = new double[mPolylineOptions.getPoints().size()];
             double[] longitudes = new double[mPolylineOptions.getPoints().size()];
             for (int i = 0; i < mPolylineOptions.getPoints().size(); i++) {
@@ -186,7 +281,7 @@ public class MapsActivity extends FragmentActivity implements
             }
         }
 
-        if(mCheckPoints != null && mCheckPoints.size() != 0){
+        if (mCheckPoints != null && mCheckPoints.size() != 0) {
             double[] checkpointLatitudes = new double[mCheckPoints.size()];
             double[] checkpointLongitudes = new double[mCheckPoints.size()];
 
@@ -198,7 +293,7 @@ public class MapsActivity extends FragmentActivity implements
             }
         }
 
-        if (mLastWaypointMarker != null){
+        if (mLastWaypointMarker != null) {
             outState.putDouble(C.INSTANCE_STATE_WAYPOINT_LATITUDE, mLastWaypointMarker.getPosition().latitude);
             outState.putDouble(C.INSTANCE_STATE_WAYPOINT_LONGITUDE, mLastWaypointMarker.getPosition().longitude);
         }
@@ -214,6 +309,9 @@ public class MapsActivity extends FragmentActivity implements
         outState.putDouble(C.INSTANCE_STATE_WAYPOINT_DISTANCE, mWaypointDistance);
         outState.putDouble(C.INSTANCE_STATE_WAYPOINT_DIRECT_DISTANCE, mWaypointDirectDistance);
 
+        outState.putBoolean(C.INSTANCE_STATE_NORTH_TOGGLED, mNorthUpToggled);
+        outState.putBoolean(C.INSTANCE_STATE_CENTER_TOGGLED, mCenterToggled);
+        outState.putBoolean(C.INSTANCE_STATE_COMPASS_TOGGLED, mCompassToggled);
 
         super.onSaveInstanceState(outState);
     }
@@ -222,8 +320,17 @@ public class MapsActivity extends FragmentActivity implements
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         Log.d(TAG, "onRestoreInstanceState");
 
-        mServiceStarted = savedInstanceState.getBoolean(C.INSTANCE_STATE_SERVICE_STARTED);
+        mServiceStarted = savedInstanceState.getBoolean(C.INSTANCE_STATE_SERVICE_STARTED, false);
         if (mServiceStarted) mStartStopButton.setText("STOP");
+
+        mNorthUpToggled = savedInstanceState.getBoolean(C.INSTANCE_STATE_NORTH_TOGGLED, false);
+
+        mCenterToggled = savedInstanceState.getBoolean(C.INSTANCE_STATE_CENTER_TOGGLED, false);
+
+        mCompassToggled = savedInstanceState.getBoolean(C.INSTANCE_STATE_COMPASS_TOGGLED, false);
+        if (mCompassToggled){
+            //TODO:
+        }
 
         mPolylineOptions = new PolylineOptions()
                 .color(Color.RED)
@@ -305,9 +412,19 @@ public class MapsActivity extends FragmentActivity implements
             Log.d(TAG, "onMapReady: Permission missing");
             return;
         }
+        Location location = locationManager.getLastKnownLocation(provider);
+        if (mCenterToggled){
+            mCenterToggleButton.setChecked(true);
+        }
+        if (mNorthUpToggled){
+            mNorthUpToggleButton.setChecked(true);
+        }
+
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
-        if (mSavedCheckpointsLatLngs != null){
+        mMap.getUiSettings().setCompassEnabled(false);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+        if (mSavedCheckpointsLatLngs != null) {
             for (LatLng latLng : mSavedCheckpointsLatLngs) {
                 mCheckPoints.add(mMap.addMarker(new MarkerOptions()
                         .position(latLng)
@@ -316,7 +433,7 @@ public class MapsActivity extends FragmentActivity implements
             }
         }
 
-        if (mSavedWaypointLatLng != null){
+        if (mSavedWaypointLatLng != null) {
             mLastWaypointMarker = mMap.addMarker(new MarkerOptions()
                     .position(mSavedWaypointLatLng)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
@@ -326,14 +443,14 @@ public class MapsActivity extends FragmentActivity implements
             Log.d(TAG, "onMapReady: Placing previous points on map");
             mPolyLine = mMap.addPolyline(mPolylineOptions);
             if (mPolyLine.getPoints().size() == 0) return;
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mPolyLine.getPoints().get(mPolyLine.getPoints().size() - 1), 16.0f));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mPolyLine.getPoints().get(mPolyLine.getPoints().size() - 1), DEFAULT_ZOOM));
             return;
         }
-        Location location = locationManager.getLastKnownLocation(provider);
+
         if (location != null) {
             Log.d(TAG, "onMapReady: moving camera to current location");
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
 
         } else {
             Log.d(TAG, "onMapReady: last location missing");
@@ -347,6 +464,7 @@ public class MapsActivity extends FragmentActivity implements
             Log.d(TAG, "startStopButtonClicked: START");
             ((Button) view).setText("STOP");
             clearMap();
+            locationManager.removeUpdates(this);
             mServiceStarted = true;
 
             Intent intentStartService = new Intent(this, OrientationService.class);
@@ -388,10 +506,23 @@ public class MapsActivity extends FragmentActivity implements
         mServiceStarted = false;
         Intent intentStopService = new Intent(this, OrientationService.class);
         this.stopService(intentStopService);
+        if (mCenterToggled) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            locationManager.requestLocationUpdates(provider, 1000, 1, this);
+        }
     }
 
 
-    //=======================================
+    //====================== UI update methods =======================
 
     private void clearMap() {
         Log.d(TAG, "clearMap: ");
@@ -400,10 +531,10 @@ public class MapsActivity extends FragmentActivity implements
         if (mPolyLine != null) mPolyLine.remove();
         if (mLastWaypointMarker != null) mLastWaypointMarker.remove();
         if (mCheckPoints != null && mCheckPoints.size() > 0) {
-            mCheckPoints.forEach(marker -> {
+            for (Marker marker : mCheckPoints) {
                 Log.d(TAG, "clearMap: Removing checkpoint");
                 marker.remove();
-            });
+            }
         } else {
             Log.d(TAG, "clearMap: didn't find any checkpoints");
         }
@@ -438,6 +569,7 @@ public class MapsActivity extends FragmentActivity implements
                 mTotalPaceTextView.setText(String.format("%.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
             }
         }
+
         if (mCheckpointDistance == -1) {
             mCheckpointDistanceTextView.setText("-");
             mCheckpointDirectDistanceTextView.setText("-");
@@ -465,12 +597,35 @@ public class MapsActivity extends FragmentActivity implements
                 mWaypointPaceTextView.setText(String.format("%.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
             }
         }
+    }
 
+    //======= Location updates when service not running and centered is toggled =======
+    @Override
+    public void onLocationChanged(Location location) {
+        if (mMap == null) return;
 
+        if (mCenterToggled){
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+        }
 
     }
 
-    //======================================
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    //====================== Broadcast receiver ======================
 
     private class MapsActivityBroadcastReceiver extends BroadcastReceiver {
         @Override
@@ -487,8 +642,11 @@ public class MapsActivity extends FragmentActivity implements
                     LatLng latlng = new LatLng(lat, lng);
                     mPolylineOptions.add(latlng);
                     mPolyLine.setPoints(mPolylineOptions.getPoints());
-                    mMap.animateCamera(CameraUpdateFactory.newLatLng(latlng));
+                    if (mCenterToggled){
+                        mMap.animateCamera(CameraUpdateFactory.newLatLng(latlng));
+                    }
                     break;
+
                 case C.ORIENTATION_SERVICE_INTENT_BACKGROUND_LOCATIONS_UPDATE:
                     Log.d(TAG, "onReceive: Receiving all locations");
                     double[] lats = intent.getDoubleArrayExtra(C.ORIENTATION_SERVICE_LATITUDES);
@@ -501,9 +659,12 @@ public class MapsActivity extends FragmentActivity implements
                     }
                     mPolylineOptions.addAll(locations);
                     mPolyLine.setPoints(mPolylineOptions.getPoints());
-                    mMap.animateCamera(CameraUpdateFactory.newLatLng(locations.get(locations.size() - 1)));
+                    if (mCenterToggled) {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLng(locations.get(locations.size() - 1)));
+                    }
                     Log.d(TAG, "onReceive: All locations added");
                     break;
+
                 case C.ORIENTATION_SERVICE_INTENT_NEW_CHECKPOINT:
                     double checkpointLat = intent.getDoubleExtra(C.ORIENTATION_SERVICE_LATITUDE, -1);
                     double checkpointLng = intent.getDoubleExtra(C.ORIENTATION_SERVICE_LONGITUDE, -1);
@@ -514,6 +675,7 @@ public class MapsActivity extends FragmentActivity implements
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
                             .title("Checkpoint #" + (mCheckPoints.size() + 1))));
                     break;
+
                 case C.ORIENTATION_SERVICE_INTENT_NEW_WAYPOINT:
                     double waypointLat = intent.getDoubleExtra(C.ORIENTATION_SERVICE_LATITUDE, -1);
                     double waypointLng = intent.getDoubleExtra(C.ORIENTATION_SERVICE_LONGITUDE, -1);

@@ -1,4 +1,4 @@
-package com.masirg.orientation;
+package com.masirg.orientation.Activities;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,16 +11,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.masirg.orientation.C;
 import com.masirg.orientation.Domain.Track;
 import com.masirg.orientation.Domain.TrackCheckpoint;
 import com.masirg.orientation.Domain.TrackPoint;
+import com.masirg.orientation.R;
 import com.masirg.orientation.Reposiotories.TrackCheckpointsRepository;
 import com.masirg.orientation.Reposiotories.TrackPointsRepository;
 import com.masirg.orientation.Reposiotories.TracksRepository;

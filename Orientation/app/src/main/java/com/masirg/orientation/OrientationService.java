@@ -23,6 +23,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.masirg.orientation.Activities.MapsActivity;
 import com.masirg.orientation.Domain.Track;
 import com.masirg.orientation.Domain.TrackCheckpoint;
 import com.masirg.orientation.Domain.TrackPoint;

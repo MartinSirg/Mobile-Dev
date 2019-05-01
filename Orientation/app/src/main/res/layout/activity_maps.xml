@@ -16,7 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:context=".MapsActivity" />
+        tools:context=".Activities.MapsActivity" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guidelineHorizontalOld"
@@ -211,14 +211,16 @@
         app:layout_constraintTop_toBottomOf="@+id/waypointPace"
         app:layout_constraintVertical_weight="3" />
 
-    <Button
-        android:id="@+id/button"
+    <ToggleButton
+        android:id="@+id/northUpToggleButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="North-up"
+        android:textOff="north-up"
+        android:textOn="north-up"
         android:textSize="12sp"
         app:layout_constraintEnd_toStartOf="@+id/button2"
         app:layout_constraintHorizontal_bias="0.5"
@@ -233,19 +235,21 @@
         android:layout_marginTop="8dp"
         android:text="Clear"
         android:textSize="12sp"
-        app:layout_constraintEnd_toStartOf="@+id/button5"
+        app:layout_constraintEnd_toStartOf="@+id/compassToggleButton"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/button"
+        app:layout_constraintStart_toEndOf="@+id/northUpToggleButton"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/button5"
+    <ToggleButton
+        android:id="@+id/compassToggleButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:text="compass"
+        android:textOff="compass"
+        android:textOn="compass"
         android:textSize="12sp"
         app:layout_constraintEnd_toStartOf="@+id/button6"
         app:layout_constraintHorizontal_bias="0.5"
@@ -263,8 +267,21 @@
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/button5"
+        app:layout_constraintStart_toEndOf="@+id/compassToggleButton"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ToggleButton
+        android:id="@+id/centerToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="Center"
+        android:textOff="Center"
+        android:textOn="center"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>
