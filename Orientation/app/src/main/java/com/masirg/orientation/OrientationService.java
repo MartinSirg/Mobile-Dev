@@ -106,6 +106,10 @@ public class OrientationService extends Service implements LocationListener {
             return START_NOT_STICKY;
         }
         locationManager.requestLocationUpdates(provider, 1000, 1, this);
+        mDistanceSinceStart = 0;
+        mTimeSinceStart = 0;
+        mLastLocation = locationManager.getLastKnownLocation(provider);
+        startingLocation = locationManager.getLastKnownLocation(provider);
 
         mBroadcastReceiver = new OrientationServiceBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter();
@@ -122,6 +126,7 @@ public class OrientationService extends Service implements LocationListener {
         repository.close();
         Log.d(TAG, "Track : " + mTrack.toString() );
 
+        mTimeSinceStart = 0;
         startTimer();
         mTracksRepository = new TracksRepository(this);
         mPointsRepository = new TrackPointsRepository(this);
@@ -138,13 +143,15 @@ public class OrientationService extends Service implements LocationListener {
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mBroadcastReceiver);
         unregisterReceiver(mNotificationReceiver);
 
-        mTrack.setTotalDistance(mDistanceSinceStart);
-        mTrack.setTotalTime(mTimeSinceStart);
-        mTrack.setDescription("-");
+        if (mTrack != null){
+            mTrack.setTotalDistance(mDistanceSinceStart);
+            mTrack.setTotalTime(mTimeSinceStart);
+            mTrack.setDescription("-");
 
-        mTracksRepository.open();
-        mTracksRepository.update(mTrack);
-        mTracksRepository.close();
+            mTracksRepository.open();
+            mTracksRepository.update(mTrack);
+            mTracksRepository.close();
+        }
     }
 
     //=================================================================
@@ -156,10 +163,9 @@ public class OrientationService extends Service implements LocationListener {
     //================================================================
     @Override
     public void onLocationChanged(Location location) {
+        Log.d(TAG, "onLocationChanged: ");
         saveTrackPointToDb(location);
         if (startingLocation == null) {
-            mDistanceSinceStart = 0;
-            mTimeSinceStart = 0;
             startingLocation = location;
         }
 
@@ -281,8 +287,15 @@ public class OrientationService extends Service implements LocationListener {
     }
 
     private void sendStatisticsUpdate() {
+        if (mLastLocation == null) {
+            Log.d(TAG, "sendStatisticsUpdate: NOT UPDATING: mLastLocation = null");
+            return;
+        } else if (startingLocation == null) {
+            Log.d(TAG, "sendStatisticsUpdate: NOT UPDATING: mStartingLocation = null");
+            return;
+        }
+
         Log.d(TAG, "sendStatisticsUpdate: ");
-        if (mLastLocation == null || startingLocation == null) return;
         if (!mCollectDataInBackground){
             Intent intent = new Intent(C.ORIENTATION_SERVICE_INTENT_STATS_UPDATE);
 
