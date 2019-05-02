@@ -26,6 +26,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.masirg.orientation.Activities.MapsActivity;
 import com.masirg.orientation.Domain.Track;
 import com.masirg.orientation.Domain.TrackCheckpoint;
@@ -40,7 +45,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class OrientationService extends Service implements LocationListener {
+public class OrientationService extends Service {
 
     private static final String TAG = OrientationService.class.getSimpleName();
     private LocationManager locationManager;
@@ -75,7 +80,9 @@ public class OrientationService extends Service implements LocationListener {
     private RemoteViews mNotificationCollapsedView;
     private RemoteViews mNotificationExpandedView;
 
-
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallBack;
 
     @Override
     public void onCreate() {
@@ -94,6 +101,11 @@ public class OrientationService extends Service implements LocationListener {
         createNotificationChannel();
         createNotification();
 
+        fusedLocationProviderClient = new FusedLocationProviderClient(this);
+        locationRequest = new LocationRequest();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setFastestInterval(1000);
+        locationRequest.setInterval(4000);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -102,11 +114,32 @@ public class OrientationService extends Service implements LocationListener {
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
+            Log.d(TAG, "onStartCommand: Permissions missing");
             onDestroy();
-            Log.e(TAG, "onStartCommand: Missing permissions");
             return START_NOT_STICKY;
         }
-        locationManager.requestLocationUpdates(provider, 1000, 1, this);
+
+        locationCallBack = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+
+                if (mLastLocation == null) {
+                    onLocationChanged(locationResult.getLastLocation());
+                }
+                else if (mLastLocation.distanceTo(locationResult.getLastLocation()) > 1) {
+                    onLocationChanged(locationResult.getLastLocation());
+                }
+            }
+
+            @Override
+            public void onLocationAvailability(LocationAvailability locationAvailability) {
+                super.onLocationAvailability(locationAvailability);
+            }
+        };
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallBack, getMainLooper());
+
+//        locationManager.requestLocationUpdates(provider, 1000, 1, this);
         mTimeSinceStart = 0;
 
         mBroadcastReceiver = new OrientationServiceBroadcastReceiver();
@@ -135,7 +168,8 @@ public class OrientationService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy: ");
-        if (locationManager != null) locationManager.removeUpdates(this);
+//        if (locationManager != null) locationManager.removeUpdates(this);
+        fusedLocationProviderClient.removeLocationUpdates(locationCallBack);
         if (mScheduledExecutorService != null) mScheduledExecutorService.shutdown();
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(mBroadcastReceiver);
         unregisterReceiver(mNotificationReceiver);
@@ -158,7 +192,7 @@ public class OrientationService extends Service implements LocationListener {
     }
 
     //================================================================
-    @Override
+
     public void onLocationChanged(Location location) {
         Log.d(TAG, "onLocationChanged: ");
         saveTrackPointToDb(location);
@@ -191,21 +225,6 @@ public class OrientationService extends Service implements LocationListener {
         }
         mLastLocation = location;
         sendStatisticsUpdate();
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
     }
     //================================================================
 

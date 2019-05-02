@@ -28,11 +28,10 @@
         android:id="@+id/trackCreatedTimeTextView"
         android:layout_width="0dp"
         android:layout_height="19dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="16dp"
         android:text="30-APR-2019 20:07"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/trackTime"
         app:layout_constraintEnd_toStartOf="@+id/viewTrackButton"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_weight="45"
@@ -41,9 +40,40 @@
         app:layout_goneMarginBottom="16dp"
         app:layout_goneMarginTop="16dp" />
 
+    <TextView
+        android:id="@+id/trackTime"
+        android:layout_width="0dp"
+        android:layout_height="19dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="30-APR-2019 20:07"
+        app:layout_constraintBottom_toTopOf="@+id/trackDistance"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintHorizontal_weight="45"
+        app:layout_constraintStart_toEndOf="@+id/trackIdTextView"
+        app:layout_constraintTop_toBottomOf="@+id/trackCreatedTimeTextView"
+        app:layout_goneMarginBottom="16dp"
+        app:layout_goneMarginTop="16dp" />
+
+    <TextView
+        android:id="@+id/trackDistance"
+        android:layout_width="0dp"
+        android:layout_height="19dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="30-APR-2019 20:07"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintHorizontal_weight="45"
+        app:layout_constraintStart_toEndOf="@+id/trackIdTextView"
+        app:layout_constraintTop_toBottomOf="@+id/trackTime"
+        app:layout_goneMarginBottom="16dp"
+        app:layout_goneMarginTop="16dp" />
+
     <ImageButton
         android:id="@+id/deleteTrackButton"
-        style="@android:style/Widget.Material.Light.ImageButton"
+        style="@style/Widget.AppCompat.ImageButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -61,10 +91,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_goneMarginBottom="16dp"
         app:layout_goneMarginTop="16dp" />
-        <!--TODO: add distance and time-->
+    <!--TODO: add distance and time-->
     <ImageButton
         android:id="@+id/editTrackButton"
-        style="@android:style/Widget.Material.Light.ImageButton"
+        style="@style/Widget.AppCompat.ImageButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
@@ -83,7 +113,7 @@
 
     <ImageButton
         android:id="@+id/viewTrackButton"
-        style="@android:style/Widget.Material.Light.ImageButton"
+        style="@style/Widget.AppCompat.ImageButton"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
@@ -107,4 +137,5 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
+
 </android.support.constraint.ConstraintLayout>

@@ -50,6 +50,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         Track track = tracks.get(i);
 
         viewHolder.mTrackIdTextView.setText(Integer.toString(i + 1));
+        viewHolder.mTrackTimeTextView.setText(String.format("%d:%02d:%02d",
+                track.getTotalTime() / 3600, track.getTotalTime() / 60 , track.getTotalTime() % 60));
         viewHolder.mTrackCreatedTimeTextView.setText(formatter.format(new Date(track.getCreationTime() * 1000)));
 
         if (mItemButtonsClickListener == null) throw new NullPointerException("mItemButtonsClickListener is null. Please set an ItemButtonsClickListener for RecyclerViewAdapter");
@@ -69,6 +71,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView mTrackIdTextView;
         private TextView mTrackCreatedTimeTextView;
+        private TextView mTrackTimeTextView;
+        private TextView mTrackDistanceTextView;
         private ImageButton mViewTrackButton;
         private ImageButton mEditTrackButton;
         private ImageButton mDeleteTrackButton;
@@ -81,6 +85,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             mViewTrackButton = itemView.findViewById(R.id.viewTrackButton);
             mEditTrackButton = itemView.findViewById(R.id.editTrackButton);
             mDeleteTrackButton = itemView.findViewById(R.id.deleteTrackButton);
+            mTrackDistanceTextView = itemView.findViewById(R.id.trackDistance);
+            mTrackTimeTextView = itemView.findViewById(R.id.trackTime);
 
             //addOnClickEvent handlers here
         }
