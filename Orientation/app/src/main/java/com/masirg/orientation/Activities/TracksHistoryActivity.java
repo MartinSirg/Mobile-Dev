@@ -127,15 +127,13 @@ public class TracksHistoryActivity extends AppCompatActivity implements
         for (TrackCheckpoint cp : trackCheckpoints) {
             sb.append("<wpt lat=\"").append(String.format("%.8f", cp.getLatitude())).append("\" lon=\"").append(String.format("%.8f", cp.getLongitude())).append("\">\n");
             sb.append("<ele>").append(String.format("%.0f", cp.getAltitude())).append("</ele>\n");
+            sb.append("<name>Checkpoint #").append(trackCheckpoints.indexOf(cp) + 1).append("</name>");
             sb.append("</wpt>\n");
         }
         sb.append("<trk><trkseg>\n");
-        int kek = 1;
         for (TrackPoint point : trackPoints) {
             sb.append("<trkpt lat=\"").append(String.format("%.8f", point.getLatitude())).append("\" lon=\"").append(String.format("%.8f", point.getLongitude())).append("\"><ele>").append(String.format("%.0f", point.getAltitude()))
                     .append("</ele><time>").append(formatter.format(new Date(point.getTime() * 1000))).append("</time></trkpt>\n");
-
-            kek++;
         }
         sb.append("</trkseg></trk>\n");
         sb.append("</gpx>");
