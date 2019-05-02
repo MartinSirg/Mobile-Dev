@@ -81,7 +81,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/ncWaypointDistance"
+            android:id="@+id/ncCheckpointDistance"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginStart="4dp"
@@ -92,7 +92,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/ncWaypointDirectDistance"
+            android:id="@+id/ncCheckpointDirectDistance"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginStart="4dp"
@@ -103,7 +103,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/ncWaypointPace"
+            android:id="@+id/ncCheckpointPace"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginStart="4dp"
@@ -135,34 +135,34 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/ncCheckpointDistance"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="2"
-            android:gravity="left|center_vertical"
-            android:text="-"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/ncCheckpointDirectDistance"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="2"
-            android:gravity="left|center_vertical"
-            android:text="-"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/ncCheckpointPace"
+            android:id="@+id/ncWaypointPace"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
             android:layout_marginBottom="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncWaypointDirectDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncWaypointDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
             android:layout_weight="2"
             android:gravity="left|center_vertical"
             android:text="-"

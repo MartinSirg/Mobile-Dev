@@ -587,15 +587,20 @@ public class MapsActivity extends FragmentActivity implements
 
     @SuppressLint("DefaultLocale")
     public void updateUI() {
+
+        if (mTotalTime == -1) {
+            mTotalTimeTextView.setText("-");
+        } else {
+            Log.d(TAG, "updateUI: Updating time");
+            mTotalTimeTextView.setText(String.format("%d:%02d:%02d",
+                    mTotalTime / 3600, mTotalTime / 60 , mTotalTime % 60));
+        }
+
         if (mTotalDistance == -1) {
             mTotalDistanceTextView.setText("-");
-            mTotalTimeTextView.setText("-");
             mTotalPaceTextView.setText("-");
         } else {
             mTotalDistanceTextView.setText(String.format("%.0f m", mTotalDistance));
-
-            mTotalTimeTextView.setText(String.format("%d:%02d:%02d",
-                    mTotalTime / 3600, mTotalTime / 60 , mTotalTime % 60));
 
             if (mTotalDistance > 0){
                 double minsPerKm = (mTotalTime * 50.0) / (mTotalDistance * 3);
@@ -764,6 +769,7 @@ public class MapsActivity extends FragmentActivity implements
                     break;
 
                 case C.ORIENTATION_SERVICE_INTENT_STATS_UPDATE:
+                    Log.d(TAG, "onReceive: Time = " + intent.getIntExtra(C.ORIENTATION_SERVICE_TOTAL_TIME, -1));
                     mTotalTime = intent.getIntExtra(C.ORIENTATION_SERVICE_TOTAL_TIME, -1);
                     mTotalDistance = intent.getDoubleExtra(C.ORIENTATION_SERVICE_TOTAL_DISTANCE, -1);
 

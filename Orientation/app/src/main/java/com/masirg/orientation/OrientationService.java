@@ -76,6 +76,7 @@ public class OrientationService extends Service implements LocationListener {
     private RemoteViews mNotificationExpandedView;
 
 
+
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate: ");
@@ -106,10 +107,7 @@ public class OrientationService extends Service implements LocationListener {
             return START_NOT_STICKY;
         }
         locationManager.requestLocationUpdates(provider, 1000, 1, this);
-        mDistanceSinceStart = 0;
         mTimeSinceStart = 0;
-        mLastLocation = locationManager.getLastKnownLocation(provider);
-        startingLocation = locationManager.getLastKnownLocation(provider);
 
         mBroadcastReceiver = new OrientationServiceBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter();
@@ -126,7 +124,6 @@ public class OrientationService extends Service implements LocationListener {
         repository.close();
         Log.d(TAG, "Track : " + mTrack.toString() );
 
-        mTimeSinceStart = 0;
         startTimer();
         mTracksRepository = new TracksRepository(this);
         mPointsRepository = new TrackPointsRepository(this);
@@ -167,6 +164,7 @@ public class OrientationService extends Service implements LocationListener {
         saveTrackPointToDb(location);
         if (startingLocation == null) {
             startingLocation = location;
+            mDistanceSinceStart = 0;
         }
 
         if (mLastWaypointLocation != null && mLastLocation != null){
@@ -192,6 +190,7 @@ public class OrientationService extends Service implements LocationListener {
             LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(sendLocationInfoIntent);
         }
         mLastLocation = location;
+        sendStatisticsUpdate();
     }
 
     @Override
@@ -287,20 +286,16 @@ public class OrientationService extends Service implements LocationListener {
     }
 
     private void sendStatisticsUpdate() {
-        if (mLastLocation == null) {
-            Log.d(TAG, "sendStatisticsUpdate: NOT UPDATING: mLastLocation = null");
-            return;
-        } else if (startingLocation == null) {
-            Log.d(TAG, "sendStatisticsUpdate: NOT UPDATING: mStartingLocation = null");
-            return;
+        if (mNotificationCollapsedView != null){
+            updateNotification();
         }
 
         Log.d(TAG, "sendStatisticsUpdate: ");
         if (!mCollectDataInBackground){
             Intent intent = new Intent(C.ORIENTATION_SERVICE_INTENT_STATS_UPDATE);
-
-            intent.putExtra(C.ORIENTATION_SERVICE_TOTAL_DISTANCE, mDistanceSinceStart);
             intent.putExtra(C.ORIENTATION_SERVICE_TOTAL_TIME, mTimeSinceStart);
+
+            if (mDistanceSinceStart != -1) intent.putExtra(C.ORIENTATION_SERVICE_TOTAL_DISTANCE, mDistanceSinceStart);
 
             if (mCheckpointLocations != null && mCheckpointLocations.size() > 0){
                 intent.putExtra(C.ORIENTATION_SERVICE_CHECKPOINT_DISTANCE, mDistanceSinceLastCheckpoint);
@@ -319,10 +314,7 @@ public class OrientationService extends Service implements LocationListener {
             }
             LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
         }
-        if (mNotificationCollapsedView != null){
-            updateNotification();
 
-        }
 
     }
 
@@ -331,11 +323,12 @@ public class OrientationService extends Service implements LocationListener {
         mNotificationCollapsedView.setTextViewText(R.id.ncTotalTime, String.format("Time: %d:%02d:%02d", mTimeSinceStart / 3600, mTimeSinceStart / 60 , mTimeSinceStart % 60));
         mNotificationExpandedView.setTextViewText(R.id.ncTotalTime, String.format("Time: %d:%02d:%02d", mTimeSinceStart / 3600, mTimeSinceStart / 60 , mTimeSinceStart % 60));
 
-        mNotificationCollapsedView.setTextViewText(R.id.ncTotalDistance,String.format("Dist: %.0f m", mDistanceSinceStart));
-        mNotificationExpandedView.setTextViewText(R.id.ncTotalDistance,String.format("Dist: %.0f m", mDistanceSinceStart));
+
 
         if (mDistanceSinceStart > 0){
             double minsPerKm = (mTimeSinceStart * 50.0) / (mDistanceSinceStart * 3);
+            mNotificationCollapsedView.setTextViewText(R.id.ncTotalDistance,String.format("Dist: %.0f m", mDistanceSinceStart));
+            mNotificationExpandedView.setTextViewText(R.id.ncTotalDistance,String.format("Dist: %.0f m", mDistanceSinceStart));
 
             mNotificationCollapsedView.setTextViewText(R.id.ncTotalPace, String.format("Pace: %.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
             mNotificationExpandedView.setTextViewText(R.id.ncTotalPace, String.format("Pace:%.0f:%02.0f min/km", minsPerKm, (minsPerKm % 1) * 60));
