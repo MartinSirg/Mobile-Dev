@@ -1,5 +1,6 @@
 package com.masirg.orientation;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -24,7 +25,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private LayoutInflater inflater;
     private ItemClickListener mItemClickListener;
     private ItemButtonsClickListener mItemButtonsClickListener;
-    private SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-YYYY HH:mm");
+    private SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.YYYY HH:mm");
 
     public RecyclerViewAdapter(Context context,
                                List<Track> tracks,
@@ -45,13 +46,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     // Binds data to the view elements in each row
+    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
         Track track = tracks.get(i);
 
         viewHolder.mTrackIdTextView.setText(Integer.toString(i + 1));
-        viewHolder.mTrackTimeTextView.setText(String.format("%d:%02d:%02d",
+        viewHolder.mTrackTimeTextView.setText(String.format("Time: %d:%02d:%02d",
                 track.getTotalTime() / 3600, track.getTotalTime() / 60 , track.getTotalTime() % 60));
+        viewHolder.mTrackDistanceTextView.setText(String.format("Dist: %.0f m", track.getTotalDistance()));
         viewHolder.mTrackCreatedTimeTextView.setText(formatter.format(new Date(track.getCreationTime() * 1000)));
 
         if (mItemButtonsClickListener == null) throw new NullPointerException("mItemButtonsClickListener is null. Please set an ItemButtonsClickListener for RecyclerViewAdapter");
