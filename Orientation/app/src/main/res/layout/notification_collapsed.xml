@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="128dp"
+    android:layout_margin="8dp"
+    android:background="@color/background"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/totalTitle"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1.5"
+            android:gravity="center"
+            android:text="Total"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/ncTotalDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncTotalTime"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncTotalPace"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/totalTitle2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1.5"
+            android:gravity="center"
+            android:text="Checkpoint"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/ncCheckpointDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncCheckpointDirectDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncCheckpointPace"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/totalTitle3"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1.5"
+            android:gravity="center"
+            android:text="Waypoint"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/ncWaypointPace"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncWaypointDirectDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ncWaypointDistance"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="2"
+            android:gravity="left|center_vertical"
+            android:text="-"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+</LinearLayout>

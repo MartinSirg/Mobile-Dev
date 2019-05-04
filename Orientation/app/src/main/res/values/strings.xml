@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Orientation</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="checkpointButton">Add checkpoint</string>
+    <string name="waypointButton">Add new waypoint</string>
+    <string name="startStopButton">Start</string>
+</resources>

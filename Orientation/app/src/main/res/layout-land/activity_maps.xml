@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <fragment
+        android:id="@+id/mapOld"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:context=".Activities.MapsActivity" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guidelineHorizontalOld"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".7" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guidelineVerticalLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".3333" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guidelineVerticalRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent=".6666" />
+
+    <TextView
+        android:id="@+id/totalDistanceOld"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/totalTimeOld"
+        app:layout_constraintEnd_toStartOf="@+id/startStopAllButton"
+        app:layout_constraintStart_toStartOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/totalTimeOld"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/totalPaceOld"
+        app:layout_constraintEnd_toStartOf="@+id/startStopAllButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/mapOld"
+        app:layout_constraintStart_toStartOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintTop_toBottomOf="@+id/totalDistanceOld" />
+
+    <TextView
+        android:id="@+id/totalPaceOld"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineVerticalLeft"
+        app:layout_constraintEnd_toStartOf="@+id/startStopAllButton"
+        app:layout_constraintStart_toStartOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintTop_toBottomOf="@+id/totalTimeOld" />
+
+    <Button
+        android:id="@+id/startStopAllButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:onClick="startStopButtonClicked"
+        android:text="@string/startStopButton"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineVerticalLeft"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/totalTimeOld"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/checkPointDistance"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/checkPointDirectDistance"
+        app:layout_constraintEnd_toEndOf="@+id/checkPointDirectDistance"
+        app:layout_constraintStart_toStartOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintTop_toBottomOf="@+id/guidelineVerticalLeft" />
+
+    <TextView
+        android:id="@+id/checkPointDirectDistance"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/checkPointPace"
+        app:layout_constraintEnd_toStartOf="@+id/button3"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/mapOld"
+        app:layout_constraintStart_toStartOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintTop_toBottomOf="@+id/checkPointDistance" />
+
+    <TextView
+        android:id="@+id/checkPointPace"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineVerticalRight"
+        app:layout_constraintEnd_toEndOf="@+id/checkPointDirectDistance"
+        app:layout_constraintStart_toStartOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintTop_toBottomOf="@+id/checkPointDirectDistance" />
+
+    <TextView
+        android:id="@+id/waypointDistance"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/waypointDirectDistance"
+        app:layout_constraintEnd_toEndOf="@+id/waypointDirectDistance"
+        app:layout_constraintStart_toStartOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintTop_toBottomOf="@id/guidelineVerticalRight" />
+
+    <TextView
+        android:id="@+id/waypointDirectDistance"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/waypointPace"
+        app:layout_constraintEnd_toStartOf="@+id/button4"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/mapOld"
+        app:layout_constraintStart_toStartOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintTop_toBottomOf="@+id/waypointDistance" />
+
+    <TextView
+        android:id="@+id/waypointPace"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/waypointDirectDistance"
+        app:layout_constraintStart_toStartOf="@+id/guidelineHorizontalOld"
+        app:layout_constraintTop_toBottomOf="@+id/waypointDirectDistance" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:onClick="addCheckpointButtonClicked"
+        android:text="@string/checkpointButton"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/guidelineVerticalRight"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/checkPointDirectDistance"
+        app:layout_constraintTop_toTopOf="@+id/guidelineVerticalLeft" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:onClick="addWaypointButtonClicked"
+        android:text="@string/waypointButton"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/waypointDirectDistance"
+        app:layout_constraintTop_toTopOf="@+id/guidelineVerticalRight" />
+
+    <ToggleButton
+        android:id="@+id/northUpToggleButton"
+        android:textOff="north-up"
+        android:textOn="north-up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="North-up"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/button2"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Clear"
+        android:textSize="12sp"
+        android:onClick="clearButtonClicked"
+        app:layout_constraintEnd_toStartOf="@+id/centerToggleButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/northUpToggleButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ToggleButton
+        android:textOn="compass"
+        android:textOff="compass"
+        android:id="@+id/compassToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="20dp"
+        android:text="compass"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/totalDistanceOld"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/button6"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:onClick="optionsButtonClicked"
+        android:text="Options"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/compassToggleButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/centerToggleButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ToggleButton
+        android:textOff="center"
+        android:textOn="center"
+        android:id="@+id/centerToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="center"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/button6"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/button2"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/compassImageView"
+        android:visibility="invisible"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/compass"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guidelineVerticalLeft"
+        app:layout_constraintVertical_bias="0.0" />
+
+
+</android.support.constraint.ConstraintLayout>
+
