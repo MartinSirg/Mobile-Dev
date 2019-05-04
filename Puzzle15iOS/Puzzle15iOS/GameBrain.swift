@@ -22,7 +22,10 @@ class GameBrain {
     var isStarted = false
     var isSolved = false
     
-    init() {
+    var width: Int;
+    var height: Int;
+    
+    init(width: Int, height: Int) {
         var counter = 1;
         gameBoard = Array(repeating: Array(repeating: -1, count: 4), count: 4)
         for i in 0...3{
@@ -31,6 +34,9 @@ class GameBrain {
                 counter += 1
             }
         }
+        //TODO: fix
+        self.width = 4 /*width*/
+        self.height = 4 /*height*/
     }
     
     func randomize() {

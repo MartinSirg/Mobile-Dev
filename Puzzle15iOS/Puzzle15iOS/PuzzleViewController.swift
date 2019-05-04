@@ -8,20 +8,28 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class PuzzleViewController: UIViewController {
     
     @IBOutlet weak var randomizeButton: UIButton!
     @IBOutlet var gameButtons: [UIButton]!
     @IBOutlet weak var timerLabel: UILabel!
     @IBOutlet weak var movesLabel: UILabel!
     
+    @IBOutlet weak var tableWrapper: UIStackView!
     
-    var game : GameBrain = GameBrain()
+    var inputHeight: Int?;
+    var inputWidth: Int?;
+    var darkModeEnabled : Bool?;
+    
+    var gameButtonsNew : [UIButton] = []
+    
+    var game : GameBrain!
     
     var timer: Timer?
     
     @objc func onTimerFires()
     {
+        
         if (game.isStarted && !game.isSolved){
             game.currentTimer += 1;
             updateStatsUI()
@@ -53,6 +61,8 @@ class ViewController: UIViewController {
         updateUI()
     }
     
+    @IBOutlet weak var topView: UIView!
+    
     @IBAction func randomizeBoardClicked(_ sender: UIButton) {
         print("reset game");
         game.randomize()
@@ -60,18 +70,69 @@ class ViewController: UIViewController {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        print("inputWidth = \(inputWidth ?? -1), inputHeight = \(inputHeight ?? -1)")
+        if (inputWidth == nil || inputWidth == -1 || inputHeight == nil || inputHeight == -1){
+            game = GameBrain(width: 4, height: 4)
+        } else{
+            game = GameBrain(width: inputWidth!, height: inputHeight!)
+        }
+        insertButtons(width: game.width,height: game.height);
+        
+        
+        if (darkModeEnabled ?? false){
+            view.backgroundColor = #colorLiteral(red: 0.1153683514, green: 0.1153683514, blue: 0.1153683514, alpha: 1)
+            randomizeButton.tintColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+            timerLabel.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+            movesLabel.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+            
+        }
+        
+        
         // Do any additional setup after loading the view.
         randomizeButton.layer.cornerRadius = 5
         randomizeButton.layer.masksToBounds = true
         randomizeButton.contentEdgeInsets = UIEdgeInsets(top: 5,left: 5,bottom: 5,right: 5)
         
         for btn in gameButtons {
+            if (darkModeEnabled ?? false){
+                btn.tintColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+            }
             btn.layer.cornerRadius = 5
             btn.layer.masksToBounds = true
         }
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(onTimerFires), userInfo: nil, repeats: true)
         updateUI()
         
+    }
+    
+    func insertButtons(width: Int ,height: Int){
+        var tagNumber = 0
+        /*
+        for row in 0...(height - 1) {
+            let rowStack = UIStackView()
+            rowStack.axis = .horizontal
+            rowStack.alignment = .fill
+            rowStack.distribution = .fill
+            rowStack.spacing = 8.0
+            tableWrapper.addArrangedSubview(rowStack)
+            
+            for col in 0...(width - 1){
+                let button = UIButton()
+                button.tintColor = self.view.tintColor
+                button.backgroundColor = UIColor.darkGray
+                button.setTitle("\(tagNumber + 1)", for: .normal)
+                button.titleLabel?.font = .systemFont(ofSize: 33)
+                button.tag = tagNumber
+                button.titleLabel?.textAlignment = NSTextAlignment.center
+                button.heightAnchor.constraint(equalTo: button.widthAnchor, multiplier: 1.0/1.0).isActive = true
+                rowStack.addArrangedSubview(button)
+                
+                print("Row: \(row), Col: \(col)")
+                tagNumber += 1
+            }
+        }
+ */
     }
     
     func updateUI() {
@@ -96,7 +157,7 @@ class ViewController: UIViewController {
     }
     
     func getCoords(tag: Int) -> (row: Int, col:Int) {
-        return (tag / 4, tag % 4)
+        return (tag / game.width, tag % game.width)
     }
 
 
