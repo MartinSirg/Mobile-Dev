@@ -21,32 +21,36 @@ class GameBrain {
     var currentMoves = 0
     var isStarted = false
     var isSolved = false
+    var emptyPlaceNumber : Int;
     
     var width: Int;
     var height: Int;
     
     init(width: Int, height: Int) {
         var counter = 1;
-        gameBoard = Array(repeating: Array(repeating: -1, count: 4), count: 4)
-        for i in 0...3{
-            for j in 0...3{
+        let rows = height < 3 ? 4 : height
+        let cols = width < 3 ? 4 : width
+        gameBoard = Array(repeating: Array(repeating: -1, count: cols), count: rows)
+        for i in 0...(rows - 1){
+            for j in 0...(cols - 1){
                 gameBoard[i][j] = counter
                 counter += 1
             }
         }
-        //TODO: fix
-        self.width = 4 /*width*/
-        self.height = 4 /*height*/
+        
+        self.emptyPlaceNumber = counter - 1
+        self.width = cols
+        self.height = rows
     }
     
     func randomize() {
         isSolved = false
         isStarted = true
         
-        var emptyTileCol = 3, emptyTileRow = 3;
+        var emptyTileCol = width - 1, emptyTileRow = height - 1;
         var counter = 1;
-        for i in 0...3{
-            for j in 0...3{
+        for i in 0...(height - 1){
+            for j in 0...(width - 1){
                 gameBoard[i][j] = counter
                 counter += 1
             }
@@ -56,14 +60,14 @@ class GameBrain {
             if (i % 2 == 0){
                 var col : Int
                 repeat {
-                    col = Int.random(in: 0...3)
+                    col = Int.random(in: 0...(width - 1))
                 } while col == emptyTileCol
                 tileClicked(rowClicked: emptyTileRow, colClicked: col);
                 emptyTileCol = col;
             } else {
                 var row: Int;
                 repeat{
-                    row = Int.random(in: 0...3)
+                    row = Int.random(in: 0...(height - 1))
                 } while row == emptyTileRow
                 
                 tileClicked(rowClicked: row, colClicked: emptyTileCol);
@@ -80,9 +84,9 @@ class GameBrain {
         if (!isStarted) {return Result.gameNotStarted}
         
         var rowEmpty = -1, colEmpty = -1
-        for i in 0...3{
-            for j in 0...3{
-                if (gameBoard[i][j] == 16){
+        for i in 0...(height - 1){
+            for j in 0...(width - 1){
+                if (gameBoard[i][j] == emptyPlaceNumber){
                     rowEmpty = i
                     colEmpty = j
                 }
@@ -97,25 +101,25 @@ class GameBrain {
         if (colClicked == colEmpty){ //Vertical axis
             if (rowClicked > rowEmpty){ //empty tile is above clicked tile
                 for i in rowEmpty...rowClicked {
-                    if (i == rowClicked) { gameBoard[i][colClicked] = 16}
+                    if (i == rowClicked) { gameBoard[i][colClicked] = emptyPlaceNumber}
                     else { gameBoard[i][colClicked] = gameBoard[i + 1][colClicked]}
                 }
             } else { //empty tile is below clicked tile
                 for i in (rowClicked...rowEmpty).reversed() {
-                    if (i == rowClicked) { gameBoard[i][colClicked] = 16 }
+                    if (i == rowClicked) { gameBoard[i][colClicked] = emptyPlaceNumber }
                     else { gameBoard[i][colClicked] = gameBoard[i - 1][colClicked] }
                 }
             }
         } else { //Horizontal axis
             if (colClicked > colEmpty){//empty tile is to the left of the clicked tile
                 for i in colEmpty...colClicked {
-                    if (i == colClicked) { gameBoard[rowClicked][i] = 16 }
+                    if (i == colClicked) { gameBoard[rowClicked][i] = emptyPlaceNumber }
                     else { gameBoard[rowClicked][i] = gameBoard[rowClicked][i + 1] }
                 }
             }
             else {//empty tile is to the right of clicked the tile
                 for i in (colClicked...colEmpty).reversed() {
-                    if (i == colClicked) { gameBoard[rowClicked][i] = 16 }
+                    if (i == colClicked) { gameBoard[rowClicked][i] = emptyPlaceNumber }
                     else { gameBoard[rowClicked][i] = gameBoard[rowClicked][i - 1] }
                 }
             }
@@ -134,10 +138,10 @@ class GameBrain {
     
     private func puzzleSolved() -> Bool {
         var counter = 1;
-        for i in 0...3{
-            for j in 0...3{
+        for i in 0...(height - 1){
+            for j in 0...(width - 1){
                 if (gameBoard[i][j] == counter) {
-                    if (counter == 16) {
+                    if (counter == emptyPlaceNumber) {
                         return true
                     }
                     counter += 1

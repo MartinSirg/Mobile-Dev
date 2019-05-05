@@ -13,6 +13,7 @@
 		4A3A9F232269F6F700D9007D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A3A9F212269F6F700D9007D /* Main.storyboard */; };
 		4A3A9F252269F6F800D9007D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A3A9F242269F6F800D9007D /* Assets.xcassets */; };
 		4A3A9F282269F6F800D9007D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A3A9F262269F6F800D9007D /* LaunchScreen.storyboard */; };
+		4A93556D227EFB14008AF0CD /* CollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A93556C227EFB14008AF0CD /* CollectionViewCell.swift */; };
 		4A9D4977227DD234001C7C90 /* SplitViewMasterController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9D4976227DD234001C7C90 /* SplitViewMasterController.swift */; };
 		4A9D497B227DDB4B001C7C90 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A9D497A227DDB4B001C7C90 /* SplitViewController.swift */; };
 /* End PBXBuildFile section */
@@ -26,6 +27,7 @@
 		4A3A9F242269F6F800D9007D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4A3A9F272269F6F800D9007D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4A3A9F292269F6F800D9007D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4A93556C227EFB14008AF0CD /* CollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewCell.swift; sourceTree = "<group>"; };
 		4A9D4976227DD234001C7C90 /* SplitViewMasterController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewMasterController.swift; sourceTree = "<group>"; };
 		4A9D497A227DDB4B001C7C90 /* SplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -69,6 +71,7 @@
 				4A3A9F242269F6F800D9007D /* Assets.xcassets */,
 				4A3A9F262269F6F800D9007D /* LaunchScreen.storyboard */,
 				4A3A9F292269F6F800D9007D /* Info.plist */,
+				4A93556C227EFB14008AF0CD /* CollectionViewCell.swift */,
 			);
 			path = Puzzle15iOS;
 			sourceTree = "<group>";
@@ -146,6 +149,7 @@
 			files = (
 				4A3A9F202269F6F700D9007D /* PuzzleViewController.swift in Sources */,
 				4A0AE864226A290B0064EBE3 /* GameBrain.swift in Sources */,
+				4A93556D227EFB14008AF0CD /* CollectionViewCell.swift in Sources */,
 				4A3A9F1E2269F6F700D9007D /* AppDelegate.swift in Sources */,
 				4A9D4977227DD234001C7C90 /* SplitViewMasterController.swift in Sources */,
 				4A9D497B227DDB4B001C7C90 /* SplitViewController.swift in Sources */,

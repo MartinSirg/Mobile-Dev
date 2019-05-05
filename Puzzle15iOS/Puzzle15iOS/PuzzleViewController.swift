@@ -11,7 +11,6 @@ import UIKit
 class PuzzleViewController: UIViewController {
     
     @IBOutlet weak var randomizeButton: UIButton!
-    @IBOutlet var gameButtons: [UIButton]!
     @IBOutlet weak var timerLabel: UILabel!
     @IBOutlet weak var movesLabel: UILabel!
     
@@ -94,7 +93,7 @@ class PuzzleViewController: UIViewController {
         randomizeButton.layer.masksToBounds = true
         randomizeButton.contentEdgeInsets = UIEdgeInsets(top: 5,left: 5,bottom: 5,right: 5)
         
-        for btn in gameButtons {
+        for btn in gameButtonsNew {
             if (darkModeEnabled ?? false){
                 btn.tintColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
             }
@@ -107,7 +106,30 @@ class PuzzleViewController: UIViewController {
     }
     
     func insertButtons(width: Int ,height: Int){
-        var tagNumber = 0
+        for col in 0...(width - 1) {
+            let columnStack = UIStackView()
+            columnStack.axis = .vertical
+            columnStack.alignment = .fill
+            columnStack.distribution = .fillEqually
+            columnStack.spacing = 8.0
+            tableWrapper.addArrangedSubview(columnStack)
+            for row in 0...(height - 1) {
+                let tagNumber = row * game.width + col
+                let button = UIButton()
+                button.tintColor = self.view.tintColor
+                button.backgroundColor = UIColor.darkGray
+                button.setTitle("\(tagNumber + 1)", for: .normal)
+                button.titleLabel?.font = .systemFont(ofSize: 20)
+                button.tag = tagNumber
+                button.titleLabel?.textAlignment = NSTextAlignment.center
+                button.heightAnchor.constraint(equalTo: button.widthAnchor, multiplier: 1.0/1.0).isActive = true
+                button.addTarget(self, action: #selector(buttonClicked(_:)), for: .touchUpInside)
+                
+                columnStack.addArrangedSubview(button)
+                gameButtonsNew.append(button)
+            }
+        }
+        
         /*
         for row in 0...(height - 1) {
             let rowStack = UIStackView()
@@ -126,8 +148,10 @@ class PuzzleViewController: UIViewController {
                 button.tag = tagNumber
                 button.titleLabel?.textAlignment = NSTextAlignment.center
                 button.heightAnchor.constraint(equalTo: button.widthAnchor, multiplier: 1.0/1.0).isActive = true
-                rowStack.addArrangedSubview(button)
+                button.addTarget(self, action: #selector(buttonClicked(_:)), for: .touchUpInside)
                 
+                rowStack.addArrangedSubview(button)
+                gameButtonsNew.append(button)
                 print("Row: \(row), Col: \(col)")
                 tagNumber += 1
             }
@@ -137,10 +161,11 @@ class PuzzleViewController: UIViewController {
     
     func updateUI() {
         UIView.performWithoutAnimation {
-            for gameButton in gameButtons {
+            for gameButton in gameButtonsNew {
+                
                 let coords = getCoords(tag: gameButton.tag)
                 let tileValue = game.gameBoard[coords.row][coords.col]
-                if (tileValue == 16) {
+                if (tileValue == game.emptyPlaceNumber) {
                     gameButton.setTitle("", for: UIControl.State.normal)
                 } else{
                     gameButton.setTitle("\(tileValue)", for: UIControl.State.normal)
@@ -157,6 +182,7 @@ class PuzzleViewController: UIViewController {
     }
     
     func getCoords(tag: Int) -> (row: Int, col:Int) {
+        
         return (tag / game.width, tag % game.width)
     }
 
