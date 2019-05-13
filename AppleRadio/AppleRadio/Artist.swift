@@ -7,3 +7,16 @@
 //
 
 import Foundation
+
+class Artist {
+    var id: Int
+    var name: String
+    var stationId: Int
+    var uniqueSongs: [String : Int] = [:]
+    
+    init(name: String) {
+        self.id = 0
+        self.name = name
+        self.stationId = 0
+    }
+}

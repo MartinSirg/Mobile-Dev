@@ -9,10 +9,12 @@
 import UIKit
 
 class SongHistoryTableViewController: UITableViewController {
+    
+    var tabBar : AppTabBarController!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        tabBar = tabBarController as? AppTabBarController
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -24,23 +26,40 @@ class SongHistoryTableViewController: UITableViewController {
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 0
+        return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 0
+        return tabBar.currentStation().artists.count
     }
 
-    /*
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "SongInfoCell", for: indexPath)
 
         // Configure the cell...
-
+        let artist = tabBar.currentStation().artists[indexPath.row]
+        cell.textLabel?.text = "\(artist.name)"
+        var songInfo = ""
+        for (songName, playedCount) in artist.uniqueSongs {
+            if (songInfo != "") { songInfo += "\n" }
+            songInfo += "\t \(playedCount) - \(songName)"
+        }
+        
+        cell.detailTextLabel?.text = "\(songInfo)"
+        
         return cell
     }
-    */
+    
+    override func viewWillAppear(_ animated: Bool) {
+        tableView.reloadData()
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return tabBar.currentStation().name
+    }
+    
 
     /*
     // Override to support conditional editing of the table view.

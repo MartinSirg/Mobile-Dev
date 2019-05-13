@@ -9,10 +9,22 @@
 import UIKit
 
 class AppTabBarController: UITabBarController {
+    
+    let stations : [Station] = [
+        Station(name: "Sky Plus", streamUrl: "-", songInfoUrl: "http://dad.akaver.com/api/SongTitles/SP"),
+        Station(name: "NRJ", streamUrl: "-", songInfoUrl: "http://dad.akaver.com/api/SongTitles/NRJ"),
+        Station(name: "RockFm", streamUrl: "-", songInfoUrl: "http://dad.akaver.com/api/SongTitles/ROCKFM")
+    ]
+    
+    func currentStation() -> Station {
+        return stations[currentStationIndex]
+    }
+    
+    var currentStationIndex = 0;
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Do any additional setup after loading the view.
     }
     
