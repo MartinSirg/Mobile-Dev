@@ -148,7 +148,6 @@ public class MapsActivity extends FragmentActivity implements
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 
 
-
         setUpToggleButtonListeners();
 
         updateUI();
@@ -176,12 +175,6 @@ public class MapsActivity extends FragmentActivity implements
         mNorthUpToggleButton.setChecked(false);
         mNorthUpToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.d(TAG, "North-Up Toggled = " + isChecked);
-
-            if (mMap == null) {
-                buttonView.setChecked(!isChecked);
-                return;
-            }
-
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -193,6 +186,16 @@ public class MapsActivity extends FragmentActivity implements
                 return;
             }
             Location lastLocation = locationManager.getLastKnownLocation(provider);
+
+            if (mMap == null) {
+                buttonView.setChecked(!isChecked);
+                return;
+            }
+            if (lastLocation == null) {
+                buttonView.setChecked(!isChecked);
+                return;
+            }
+
 
             if (isChecked) {
                 mMap.getUiSettings().setRotateGesturesEnabled(false);
@@ -212,13 +215,28 @@ public class MapsActivity extends FragmentActivity implements
         mCenterToggleButton.setChecked(false);
         mCenterToggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.d(TAG, "Center Toggled = " + isChecked);
-
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            Location lastLocation = locationManager.getLastKnownLocation(provider);
+            if (lastLocation == null) {
+                buttonView.setChecked(!isChecked);
+                return;
+            }
             if (mMap == null) {
                 buttonView.setChecked(!isChecked);
                 return;
             }
 
-            Location lastLocation = locationManager.getLastKnownLocation(provider);
+
+
             if (isChecked) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude())));
                 mMap.getUiSettings().setScrollGesturesEnabled(false);
@@ -593,7 +611,7 @@ public class MapsActivity extends FragmentActivity implements
         } else {
             Log.d(TAG, "updateUI: Updating time");
             mTotalTimeTextView.setText(String.format("%d:%02d:%02d",
-                    mTotalTime / 3600, mTotalTime / 60 , mTotalTime % 60));
+                    mTotalTime / 3600, (mTotalTime / 60) % 60 , mTotalTime % 60));
         }
 
         if (mTotalDistance == -1) {

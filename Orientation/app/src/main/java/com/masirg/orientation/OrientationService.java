@@ -68,6 +68,8 @@ public class OrientationService extends Service {
     private double mDistanceSinceLastCheckpoint = -1;
     private double mDistanceSinceStart = -1;
 
+    private boolean mScreenIsTurnedOn = true;
+
     private Location startingLocation;
     private Location mLastWaypointLocation;
     private Location mLastLocation;
@@ -104,8 +106,8 @@ public class OrientationService extends Service {
         fusedLocationProviderClient = new FusedLocationProviderClient(this);
         locationRequest = new LocationRequest();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setFastestInterval(1000);
-        locationRequest.setInterval(4000);
+        locationRequest.setFastestInterval(3000);
+        locationRequest.setInterval(10000);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -141,6 +143,21 @@ public class OrientationService extends Service {
 
 //        locationManager.requestLocationUpdates(provider, 1000, 1, this);
         mTimeSinceStart = 0;
+
+        IntentFilter intentFilter1 = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        intentFilter1.addAction(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                    Log.d(TAG, Intent.ACTION_SCREEN_OFF);
+                    mScreenIsTurnedOn = false;
+                } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                    Log.d(TAG, Intent.ACTION_SCREEN_ON);
+                    mScreenIsTurnedOn = true;
+                }
+            }
+        }, intentFilter1);
 
         mBroadcastReceiver = new OrientationServiceBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter();
@@ -297,14 +314,23 @@ public class OrientationService extends Service {
         if (mScheduledExecutorService != null) mScheduledExecutorService.shutdown();
         mScheduledExecutorService = Executors.newScheduledThreadPool(5);
         mScheduledExecutorService.scheduleAtFixedRate(() ->{
-            if (mTimeSinceStart != -1) mTimeSinceStart++;
-            if (mTimeSinceLastCheckpoint!= -1) mTimeSinceLastCheckpoint++;
-            if (mTimeSinceLastWaypoint != -1) mTimeSinceLastWaypoint++;
-            sendStatisticsUpdate();
+            try {
+                if (mTimeSinceStart != -1) mTimeSinceStart++;
+                if (mTimeSinceLastCheckpoint!= -1) mTimeSinceLastCheckpoint++;
+                if (mTimeSinceLastWaypoint != -1) mTimeSinceLastWaypoint++;
+                if (mScreenIsTurnedOn) sendStatisticsUpdate();
+            }catch (Exception e){
+                Log.e(TAG, "startTimer Exception : " + e.getMessage() );
+            }
+
         },0,1, TimeUnit.SECONDS);
     }
 
     private void sendStatisticsUpdate() {
+        if (!mScreenIsTurnedOn){
+            Log.d(TAG, "sendStatisticsUpdate: Screen is off, no need to notify");
+           return;
+        }
         if (mNotificationCollapsedView != null){
             updateNotification();
         }
@@ -339,8 +365,8 @@ public class OrientationService extends Service {
 
     @SuppressLint("DefaultLocale")
     private void updateNotification() {
-        mNotificationCollapsedView.setTextViewText(R.id.ncTotalTime, String.format("Time: %d:%02d:%02d", mTimeSinceStart / 3600, mTimeSinceStart / 60 , mTimeSinceStart % 60));
-        mNotificationExpandedView.setTextViewText(R.id.ncTotalTime, String.format("Time: %d:%02d:%02d", mTimeSinceStart / 3600, mTimeSinceStart / 60 , mTimeSinceStart % 60));
+        mNotificationCollapsedView.setTextViewText(R.id.ncTotalTime, String.format("Time: %d:%02d:%02d", mTimeSinceStart / 3600, (mTimeSinceStart / 60) % 60 , mTimeSinceStart % 60));
+        mNotificationExpandedView.setTextViewText(R.id.ncTotalTime, String.format("Time: %d:%02d:%02d", mTimeSinceStart / 3600, (mTimeSinceStart / 60) % 60 , mTimeSinceStart % 60));
 
 
 
@@ -387,7 +413,7 @@ public class OrientationService extends Service {
         }
 
         Notification notification = new NotificationCompat.Builder(this, C.NOTIFICATION_CHANNEL_1)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setSmallIcon(R.drawable.ic_map_black_24dp)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setCustomContentView(mNotificationCollapsedView)
                 .setCustomBigContentView(mNotificationExpandedView)
